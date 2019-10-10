@@ -16,8 +16,11 @@
 
 library zxing_dart;
 
-import com.google.zxing.common.BitArray;
-import com.google.zxing.common.BitMatrix;
+import 'LuminanceSource.dart';
+import 'common/BitArray.dart';
+
+
+import 'common/BitMatrix.dart';
 
 /**
  * This class hierarchy provides a set of methods to convert luminance data to 1 bit data.
@@ -31,7 +34,7 @@ abstract class Binarizer {
 
   final LuminanceSource _source;
 
-  Binarizer(this._source)
+  Binarizer(this._source);
   
 
   LuminanceSource getLuminanceSource() {
