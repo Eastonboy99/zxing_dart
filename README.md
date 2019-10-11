@@ -1,6 +1,6 @@
 # zxing_dart
 
-A new Flutter package project.
+A dart port of [ZXing](https://github.com/zxing/zxing) (Zebra Crossing)
 
 ## Getting Started
 
