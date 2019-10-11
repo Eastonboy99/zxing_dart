@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-
 import 'dart:typed_data';
 
 import 'BarcodeFormat.dart';
+import 'ResultPoint.dart';
+import 'ResultMetadataType.dart';
 
 /**
  * <p>Encapsulates the result of decoding a barcode within an image.</p>
@@ -25,20 +26,107 @@ import 'BarcodeFormat.dart';
  * @author Sean Owen
  */
 class Result {
-
   final String _text;
   final Uint64List _rawBytes;
-  final int _numBits;
+  int _numBits;
   List<ResultPoint> _resultPoints;
   final BarcodeFormat _format;
-  Map<ResultMetadataType,Object> _resultMetadata;
-  final int _timestamp;
+  Map<ResultMetadataType, Object> _resultMetadata;
+  int timestamp;
 
-
-  Result(this._text, this._rawBytes, this._numBits, this._format, this._timestamp){
-    
+  Result(this._text, this._rawBytes, this._resultPoints, this._format,
+      {this.timestamp}) {
+    this._numBits = this._rawBytes == null ? 0 : 8 * this._rawBytes.length;
+    this._resultMetadata = null;
+    this.timestamp = this.timestamp == null ? getTimestamp() : this.timestamp;
   }
 
+  /**
+   * @return raw text encoded by the barcode
+   */
+  String getText() {
+    return this._text;
+  }
 
+  /**
+   * @return raw bytes encoded by the barcode, if applicable, otherwise
+   *         {@code null}
+   */
+  Uint64List getRawBytes() {
+    return this._rawBytes;
+  }
 
+  /**
+   * @return how many bits of {@link #getRawBytes()} are valid; typically 8 times
+   *         its length
+   * @since 3.3.0
+   */
+  int getNumBits() {
+    return this._numBits;
+  }
+
+  /**
+   * @return points related to the barcode in the image. These are typically
+   *         points identifying finder patterns or the corners of the barcode. The
+   *         exact meaning is specific to the type of barcode that was decoded.
+   */
+  List<ResultPoint> getResultPoints() {
+    return this._resultPoints;
+  }
+
+  /**
+   * @return {@link BarcodeFormat} representing the format of the barcode that was
+   *         decoded
+   */
+  BarcodeFormat getBarcodeFormat() {
+    return this._format;
+  }
+
+  /**
+   * @return {@link Map} mapping {@link ResultMetadataType} keys to values. May be
+   *         {@code null}. This contains optional metadata about what was detected
+   *         about the barcode, like orientation.
+   */
+  Map<ResultMetadataType, Object> getResultMetadata() {
+    return this._resultMetadata;
+  }
+
+  void putMetadata(ResultMetadataType type, Object value) {
+    if (this._resultMetadata == null) {
+      this._resultMetadata = new Map<ResultMetadataType, Object>();
+    }
+    this._resultMetadata.putIfAbsent(type, value);
+  }
+
+  void putAllMetadata(Map<ResultMetadataType, Object> metadata) {
+    if (metadata != null) {
+      if (this._resultMetadata == null) {
+        this._resultMetadata = metadata;
+      } else {
+        this._resultMetadata.addAll(metadata);
+      }
+    }
+  }
+
+  void addResultPoints(List<ResultPoint> newPoints) {
+    List<ResultPoint> oldPoints = this._resultPoints;
+    if (oldPoints == null) {
+      this._resultPoints = newPoints;
+    } else if (newPoints != null && newPoints.length > 0) {
+      List<ResultPoint> allPoints =
+          new List<ResultPoint>(oldPoints.length + newPoints.length);
+      allPoints.addAll(oldPoints);
+      allPoints.addAll(newPoints);
+      this._resultPoints = allPoints;
+    }
+  }
+
+  int getTimestamp() {
+    return this._timestamp;
+  }
+
+  @override
+  String toString() {
+    return this._text;
+  }
 }

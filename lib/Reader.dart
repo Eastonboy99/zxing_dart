@@ -17,6 +17,7 @@
 
 import 'BinaryBitmap.dart';
 import 'DecodeHintType.dart';
+import 'Result.dart';
 
 /**
  * Implementations of this interface can decode an image of a barcode in some format into
@@ -41,7 +42,7 @@ abstract class Reader {
    * @throws ChecksumException if a potential barcode is found but does not pass its checksum
    * @throws FormatException if a potential barcode is found but format is invalid
    */
-  Result decode(BinaryBitmap image) ;
+  Result decode(BinaryBitmap image, {Map<DecodeHintType, Object> hints}) ;
 
   /**
    * Locates and decodes a barcode in some format within an image. This method also accepts
@@ -57,8 +58,6 @@ abstract class Reader {
    * @throws ChecksumException if a potential barcode is found but does not pass its checksum
    * @throws FormatException if a potential barcode is found but format is invalid
    */
-  Result decode(BinaryBitmap image, Map<DecodeHintType,?> hints)
-      ;
 
   /**
    * Resets any internal state the implementation has after a decode, to prepare it
