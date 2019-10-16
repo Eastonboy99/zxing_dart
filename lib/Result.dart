@@ -122,7 +122,7 @@ class Result {
   }
 
   int getTimestamp() {
-    return this._timestamp;
+    return this.timestamp;
   }
 
   @override

@@ -14,19 +14,18 @@
  * limitations under the License.
  */
 
+import '../../DecodeHintType.dart';
+import '../../common/BitMatrix.dart';
+import '../../common/DecoderResult.dart';
+import '../../common/reedsolomon/GenericGF.dart';
+import '../../common/reedsolomon/ReedSolomonDecoder.dart';
 
 
 
-import com.google.zxing.ChecksumException;
-import com.google.zxing.DecodeHintType;
-import com.google.zxing.FormatException;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.common.DecoderResult;
-import com.google.zxing.common.reedsolomon.GenericGF;
-import com.google.zxing.common.reedsolomon.ReedSolomonDecoder;
-import com.google.zxing.common.reedsolomon.ReedSolomonException;
+// import com.google.zxing.ChecksumException;
+// import com.google.zxing.FormatException;
+// import com.google.zxing.common.reedsolomon.ReedSolomonException;
 
-import java.util.Map;
 
 /**
  * <p>The main class which implements QR Code decoding -- as opposed to locating and extracting
@@ -34,17 +33,10 @@ import java.util.Map;
  *
  * @author Sean Owen
  */
-public final class Decoder {
+class Decoder {
 
-  private final ReedSolomonDecoder rsDecoder;
+  final ReedSolomonDecoder _rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
 
-  public Decoder() {
-    rsDecoder = new ReedSolomonDecoder(GenericGF.QR_CODE_FIELD_256);
-  }
-
-  public DecoderResult decode(boolean[][] image) throws ChecksumException, FormatException {
-    return decode(image, null);
-  }
 
   /**
    * <p>Convenience method that can decode a QR Code represented as a 2D array of booleans.
@@ -56,14 +48,6 @@ public final class Decoder {
    * @throws FormatException if the QR Code cannot be decoded
    * @throws ChecksumException if error correction fails
    */
-  public DecoderResult decode(boolean[][] image, Map<DecodeHintType,?> hints)
-      throws ChecksumException, FormatException {
-    return decode(BitMatrix.parse(image), hints);
-  }
-
-  public DecoderResult decode(BitMatrix bits) throws ChecksumException, FormatException {
-    return decode(bits, null);
-  }
 
   /**
    * <p>Decodes a QR Code represented as a {@link BitMatrix}. A 1 or "true" is taken to mean a black module.</p>
@@ -74,8 +58,8 @@ public final class Decoder {
    * @throws FormatException if the QR Code cannot be decoded
    * @throws ChecksumException if error correction fails
    */
-  public DecoderResult decode(BitMatrix bits, Map<DecodeHintType,?> hints)
-      throws FormatException, ChecksumException {
+  DecoderResult decode(BitMatrix bits, Map<DecodeHintType,Object> hints)
+    {
 
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
