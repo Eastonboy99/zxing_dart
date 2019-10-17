@@ -39,7 +39,7 @@ class Version {
       0x2542E, 0x26A64, 0x27541, 0x28C69
   };
 
-  static final List<Version> _VERSIONS = this._buildVersions();
+  static final List<Version> _VERSIONS = _buildVersions();
 
   final int _versionNumber;
   final List<int> _alignmentPatternCenters;
@@ -105,7 +105,7 @@ class Version {
     if (versionNumber < 1 || versionNumber > 40) {
       throw new Exception();
     }
-    return this._VERSIONS[versionNumber - 1];
+    return _VERSIONS[versionNumber - 1];
   }
 
   static Version decodeVersionInformation(int versionBits) {
@@ -184,95 +184,134 @@ class Version {
    */
 static List<Version> _buildVersions() {
     return new List.from({
-        new Version(1, new int[]{},
-            new ECBlocks(7, new ECB(1, 19)),
-            new ECBlocks(10, new ECB(1, 16)),
-            new ECBlocks(13, new ECB(1, 13)),
-            new ECBlocks(17, new ECB(1, 9))),
-        new Version(2, new int[]{6, 18},
-            new ECBlocks(10, new ECB(1, 34)),
-            new ECBlocks(16, new ECB(1, 28)),
-            new ECBlocks(22, new ECB(1, 22)),
-            new ECBlocks(28, new ECB(1, 16))),
-        new Version(3, new int[]{6, 22},
-            new ECBlocks(15, new ECB(1, 55)),
-            new ECBlocks(26, new ECB(1, 44)),
-            new ECBlocks(18, new ECB(2, 17)),
-            new ECBlocks(22, new ECB(2, 13))),
-        new Version(4, new int[]{6, 26},
-            new ECBlocks(20, new ECB(1, 80)),
-            new ECBlocks(18, new ECB(2, 32)),
-            new ECBlocks(26, new ECB(2, 24)),
-            new ECBlocks(16, new ECB(4, 9))),
-        new Version(5, new int[]{6, 30},
-            new ECBlocks(26, new ECB(1, 108)),
-            new ECBlocks(24, new ECB(2, 43)),
-            new ECBlocks(18, new ECB(2, 15),
-                new ECB(2, 16)),
-            new ECBlocks(22, new ECB(2, 11),
-                new ECB(2, 12))),
-        new Version(6, new int[]{6, 34},
-            new ECBlocks(18, new ECB(2, 68)),
-            new ECBlocks(16, new ECB(4, 27)),
-            new ECBlocks(24, new ECB(4, 19)),
-            new ECBlocks(28, new ECB(4, 15))),
-        new Version(7, new int[]{6, 22, 38},
-            new ECBlocks(20, new ECB(2, 78)),
-            new ECBlocks(18, new ECB(4, 31)),
-            new ECBlocks(18, new ECB(2, 14),
-                new ECB(4, 15)),
-            new ECBlocks(26, new ECB(4, 13),
-                new ECB(1, 14))),
-        new Version(8, new int[]{6, 24, 42},
-            new ECBlocks(24, new ECB(2, 97)),
-            new ECBlocks(22, new ECB(2, 38),
-                new ECB(2, 39)),
-            new ECBlocks(22, new ECB(4, 18),
-                new ECB(2, 19)),
-            new ECBlocks(26, new ECB(4, 14),
-                new ECB(2, 15))),
-        new Version(9, new int[]{6, 26, 46},
-            new ECBlocks(30, new ECB(2, 116)),
-            new ECBlocks(22, new ECB(3, 36),
-                new ECB(2, 37)),
-            new ECBlocks(20, new ECB(4, 16),
-                new ECB(4, 17)),
-            new ECBlocks(24, new ECB(4, 12),
-                new ECB(4, 13))),
-        new Version(10, new int[]{6, 28, 50},
-            new ECBlocks(18, new ECB(2, 68),
-                new ECB(2, 69)),
-            new ECBlocks(26, new ECB(4, 43),
-                new ECB(1, 44)),
-            new ECBlocks(24, new ECB(6, 19),
-                new ECB(2, 20)),
-            new ECBlocks(28, new ECB(6, 15),
-                new ECB(2, 16))),
-        new Version(11, new int[]{6, 30, 54},
-            new ECBlocks(20, new ECB(4, 81)),
-            new ECBlocks(30, new ECB(1, 50),
-                new ECB(4, 51)),
-            new ECBlocks(28, new ECB(4, 22),
-                new ECB(4, 23)),
-            new ECBlocks(24, new ECB(3, 12),
-                new ECB(8, 13))),
-        new Version(12, new int[]{6, 32, 58},
-            new ECBlocks(24, new ECB(2, 92),
-                new ECB(2, 93)),
-            new ECBlocks(22, new ECB(6, 36),
-                new ECB(2, 37)),
-            new ECBlocks(26, new ECB(4, 20),
-                new ECB(6, 21)),
-            new ECBlocks(28, new ECB(7, 14),
-                new ECB(4, 15))),
-        new Version(13, new int[]{6, 34, 62},
-            new ECBlocks(26, new ECB(4, 107)),
-            new ECBlocks(22, new ECB(8, 37),
-                new ECB(1, 38)),
-            new ECBlocks(24, new ECB(8, 20),
-                new ECB(4, 21)),
-            new ECBlocks(22, new ECB(12, 11),
-                new ECB(4, 12))),
+        new Version(1, new List<int>.from({}), 
+        new List.from({
+            new ECBlocks(7, List.from({new ECB(1, 19)})),
+            new ECBlocks(10, List.from({new ECB(1, 16)})),
+            new ECBlocks(13, List.from({new ECB(1, 13)})),
+            new ECBlocks(17, List.from({new ECB(1, 9)}))
+        })
+        ),
+        new Version(2, new List<int>.from({6, 18}),
+        new List.from({
+            new ECBlocks(10, List.from({new ECB(1, 34)})),
+            new ECBlocks(16, List.from({new ECB(1, 28)})),
+            new ECBlocks(22, List.from({new ECB(1, 22)})),
+            new ECBlocks(28, List.from({new ECB(1, 16)}))
+            })
+        ),
+        new Version(3, new List<int>.from({6, 22}),
+        new List.from({
+            new ECBlocks(15, List.from({new ECB(1, 55)})),
+            new ECBlocks(26, List.from({new ECB(1, 44)})),
+            new ECBlocks(18, List.from({new ECB(2, 17)})),
+            new ECBlocks(22, List.from({new ECB(2, 13)}))
+        })
+            ),
+        new Version(4, new List<int>.from({6, 26}),
+        new List.from({
+            new ECBlocks(20, List.from({new ECB(1, 80)})),
+            new ECBlocks(18, List.from({new ECB(2, 32)})),
+            new ECBlocks(26, List.from({new ECB(2, 24)})),
+            new ECBlocks(16, List.from({new ECB(4, 9)}))
+        })
+            ),
+        new Version(5, new List<int>.from({6, 30}),
+        new List.from({
+            new ECBlocks(26, List.from({new ECB(1, 108)})),
+            new ECBlocks(24, List.from({new ECB(2, 43)})),
+            new ECBlocks(18, List.from({new ECB(2, 15),
+                new ECB(2, 16)})),
+            new ECBlocks(22, List.from({ new ECB(2, 11),
+                new ECB(2, 12)}))
+        })
+                ),
+        new Version(6, new List.from({6, 34}),
+        List.from({
+            new ECBlocks(18, List.from({new ECB(2, 68)})),
+            new ECBlocks(16, List.from({new ECB(4, 27)})),
+            new ECBlocks(24, List.from({new ECB(4, 19)})),
+            new ECBlocks(28, List.from({new ECB(4, 15)}))
+        })
+            ),
+        new Version(7, new List.from({6, 22, 38}),
+        List.from({
+            new ECBlocks(20, List.from({new ECB(2, 78)})),
+            new ECBlocks(18, List.from({new ECB(4, 31)})),
+            new ECBlocks(18, List.from({new ECB(2, 14),
+                new ECB(4, 15)})),
+            new ECBlocks(26, List.from({new ECB(4, 13),
+                new ECB(1, 14)}))
+        })
+        ),
+        new Version(8, new List.from({6, 24, 42}),
+        List.from({
+            new ECBlocks(24, List.from({new ECB(2, 97)})),
+            new ECBlocks(22, List.from({new ECB(2, 38),
+                new ECB(2, 39)})),
+            new ECBlocks(22, List.from({new ECB(4, 18),
+                new ECB(2, 19)})),
+            new ECBlocks(26, List.from({new ECB(4, 14),
+                new ECB(2, 15)}))
+        })
+                ),
+        new Version(9, new List.from({6, 26, 46}),
+        List.from({
+            new ECBlocks(30, List.from({new ECB(2, 116)})),
+            new ECBlocks(22, List.from({new ECB(3, 36),
+                new ECB(2, 37)})),
+            new ECBlocks(20, List.from({new ECB(4, 16),
+                new ECB(4, 17)})),
+            new ECBlocks(24, List.from({new ECB(4, 12),
+                new ECB(4, 13)}))
+        })
+                ),
+        new Version(10, new List.from({6, 28, 50}),
+        List.from({
+            new ECBlocks(18, List.from({new ECB(2, 68),
+                new ECB(2, 69)})),
+            new ECBlocks(26, List.from({new ECB(4, 43),
+                new ECB(1, 44)})),
+            new ECBlocks(24, List.from({new ECB(6, 19),
+                new ECB(2, 20)})),
+            new ECBlocks(28, List.from({new ECB(6, 15),
+                new ECB(2, 16)}))
+        })
+                ),
+        new Version(11, new List.from({6, 30, 54}),
+        List.from({
+            new ECBlocks(20, List.from({new ECB(4, 81)})),
+            new ECBlocks(30, List.from({new ECB(1, 50),
+                new ECB(4, 51)})),
+            new ECBlocks(28, List.from({new ECB(4, 22),
+                new ECB(4, 23)})),
+            new ECBlocks(24, List.from({new ECB(3, 12),
+                new ECB(8, 13)}))
+        })
+                ),
+        new Version(12, new List.from({6, 32, 58}),
+        List.from({
+            new ECBlocks(24, List.from({new ECB(2, 92),
+                new ECB(2, 93)})),
+            new ECBlocks(22, List.from({new ECB(6, 36),
+                new ECB(2, 37)})),
+            new ECBlocks(26, List.from({new ECB(4, 20),
+                new ECB(6, 21)})),
+            new ECBlocks(28, List.from({new ECB(7, 14),
+                new ECB(4, 15)}))
+        })
+        ),
+        new Version(13, new List.from({6, 34, 62}),
+        List.from({
+            new ECBlocks(26, List.from({new ECB(4, 107)})),
+            new ECBlocks(22, List.from({new ECB(8, 37),
+                new ECB(1, 38)})),
+            new ECBlocks(24, List.from({new ECB(8, 20),
+                new ECB(4, 21)})),
+            new ECBlocks(22, List.from({new ECB(12, 11),
+                new ECB(4, 12)}))
+        })
+                ),
         new Version(14, new int[]{6, 26, 46, 66},
             new ECBlocks(30, new ECB(3, 115),
                 new ECB(1, 116)),
