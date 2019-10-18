@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+
 import '../../DecodeHintType.dart';
 import '../../common/BitMatrix.dart';
 import '../../common/DecoderResult.dart';
