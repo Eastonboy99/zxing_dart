@@ -14,7 +14,11 @@
  * limitations under the License.
  */
 
-import '../../common/BitMatrix.dart';
+
+
+import 'package:built_value/built_value.dart';
+
+import "../../common/BitMatrix.dart";
 
 /**
  * <p>Encapsulates data masks for the data bits in a QR code, per ISO 18004:2006 6.8. Implementations
@@ -28,71 +32,12 @@ import '../../common/BitMatrix.dart';
  * @author Sean Owen
  */
 
-class DataMask{
+class DataMaskClass {
   Function isMasked;
-  static final Map<String, DataMask> _dataMasks = new Map();
 
-
-  factory DataMask() {
-  
-  }
-
-  DataMask._internal(){
-    _dataMasks.putIfAbsent("DATA_MASK_000", DATA_MASK_000);
-  }
-
-  DataMask._object(Function isMasked) {
+  DataMaskClass(Function isMask){
     this.isMasked = isMasked;
-    return this;
   }
-
-  var DATA_MASK_000 = new DataMask._object((int i, int j) => {((i + j) & 0x01) == 0});
-
-/**
-   * 001: mask bits for which x mod 2 == 0
-   */
-var DATA_MASK_001 = new DataMask._object((int i, int j) => {(i & 0x01) == 0});
-
-/**
-   * 010: mask bits for which y mod 3 == 0
-   */
-
-var DATA_MASK_010 = new DataMask._object((int i, int j) => {j % 3 == 0});
-
-/**
-   * 011: mask bits for which (x + y) mod 3 == 0
-   */
-
-var DATA_MASK_011 = new DataMask._object((int i, int j) => {(i + j) % 3 == 0});
-
-/**
-   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
-   */
-
-var DATA_MASK_100 =
-    new DataMask._object((int i, int j) => {(((i ~/ 2) + (j ~/ 3)) & 0x01) == 0});
-
-/**
-   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
-   * equivalently, such that xy mod 6 == 0
-   */
-var DATA_MASK_101 = new DataMask._object((int i, int j) => {(i * j) % 6 == 0});
-
-/**
-   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that xy mod 6 < 3
-   */
-
-var DATA_MASK_110 = new DataMask._object((int i, int j) => {((i * j) % 6) < 3});
-
-/**
-   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
-   */
-
-var DATA_MASK_111 =
-    new DataMask._object((int i, int j) => {((i + j + ((i * j) % 3)) & 0x01) == 0});
-
   /**
    * <p>Implementations of this method reverse the data masking process applied to a QR Code and
    * make its bits ready to read.</p>
@@ -110,13 +55,64 @@ var DATA_MASK_111 =
     }
   }
 
-  // bool isMasked(int i, int j);
 }
 
-// See ISO 18004:2006 6.8.1
 
-/**
+class DataMask extends EnumClass{
+  static final _singleton = DataMask._internal("DataMask");
+
+  DataMask._internal(String name) : super(name);
+
+  factory DataMask(){
+    return _singleton;
+  }
+
+    // See ISO 18004:2006 6.8.1
+
+  /**
    * 000: mask bits for which (x + y) mod 2 == 0
    */
 
+  static final DATA_MASK_000 =  new DataMaskClass((int i, int j) => {((i + j) & 0x01) == 0});
 
+    /**
+   * 001: mask bits for which x mod 2 == 0
+   */
+  static final DATA_MASK_001 =  new DataMaskClass((int i, int j) => {(i & 0x01) == 0});
+
+    /**
+   * 010: mask bits for which y mod 3 == 0
+   */
+  static final DATA_MASK_010 =  new DataMaskClass((int i, int j) => {j % 3 == 0});
+
+  /**
+   * 011: mask bits for which (x + y) mod 3 == 0
+   */
+  static final DATA_MASK_011 =  new DataMaskClass((int i, int j) => {(i + j) % 3 == 0});
+    /**
+   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
+   */
+  static final DATA_MASK_100 =  new DataMaskClass((int i, int j) => {(((i ~/ 2) + (j ~/ 3)) & 0x01) == 0});
+    /**
+   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
+   * equivalently, such that xy mod 6 == 0
+   */
+  static final DATA_MASK_101 =  new DataMaskClass((int i, int j) => {(i * j) % 6 == 0});
+
+    /**
+   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that xy mod 6 < 3
+   */
+  static final DATA_MASK_110 =  new DataMaskClass((int i, int j) => {((i * j) % 6) < 3});
+
+  /**
+   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
+   */
+  static final DATA_MASK_111 =  new DataMaskClass((int i, int j) => {((i + j + ((i * j) % 3)) & 0x01) == 0});
+
+  // End of enum constants.
+
+
+
+}

@@ -12,6 +12,7 @@ dependencies:
     sdk: flutter
   fixnum: ^0.10.9
   collection: any
+  built_value: ^6.7.1
 
 dev_dependencies:
   flutter_test:
