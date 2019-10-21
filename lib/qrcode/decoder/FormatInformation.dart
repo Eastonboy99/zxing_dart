@@ -16,7 +16,6 @@
 
 
 
-import 'dart:ffi' as prefix0;
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';

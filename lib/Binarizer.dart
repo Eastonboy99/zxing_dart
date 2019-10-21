@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-library zxing_dart;
+
 
 import 'LuminanceSource.dart';
 import 'common/BitArray.dart';

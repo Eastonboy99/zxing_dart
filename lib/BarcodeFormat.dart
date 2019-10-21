@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-library zxing_dart;
+
 
 /// Enumerates barcode formats known to this package. Please keep alphabetized.
 

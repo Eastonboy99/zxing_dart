@@ -19,6 +19,7 @@
 import 'dart:typed_data';
 
 import '../../common/BitMatrix.dart';
+import 'DataMask.dart';
 import 'Version.dart';
 import 'FormatInformation.dart';
 
