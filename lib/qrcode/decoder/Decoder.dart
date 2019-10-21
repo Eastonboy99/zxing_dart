@@ -64,7 +64,7 @@ class Decoder {
 
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
-    FormatException fe = null;
+    FormatException fe;
     ChecksumException ce = null;
     try {
       return decode(parser, hints);

@@ -28,8 +28,70 @@ import '../../common/BitMatrix.dart';
  * @author Sean Owen
  */
 
-abstract class DataMask{
-  factory DataMask._() => null;
+class DataMask{
+  Function isMasked;
+  static final Map<String, DataMask> _dataMasks = new Map();
+
+
+  factory DataMask() {
+  
+  }
+
+  DataMask._internal(){
+    _dataMasks.putIfAbsent("DATA_MASK_000", DATA_MASK_000);
+  }
+
+  DataMask._object(Function isMasked) {
+    this.isMasked = isMasked;
+    return this;
+  }
+
+  var DATA_MASK_000 = new DataMask._object((int i, int j) => {((i + j) & 0x01) == 0});
+
+/**
+   * 001: mask bits for which x mod 2 == 0
+   */
+var DATA_MASK_001 = new DataMask._object((int i, int j) => {(i & 0x01) == 0});
+
+/**
+   * 010: mask bits for which y mod 3 == 0
+   */
+
+var DATA_MASK_010 = new DataMask._object((int i, int j) => {j % 3 == 0});
+
+/**
+   * 011: mask bits for which (x + y) mod 3 == 0
+   */
+
+var DATA_MASK_011 = new DataMask._object((int i, int j) => {(i + j) % 3 == 0});
+
+/**
+   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
+   */
+
+var DATA_MASK_100 =
+    new DataMask._object((int i, int j) => {(((i ~/ 2) + (j ~/ 3)) & 0x01) == 0});
+
+/**
+   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
+   * equivalently, such that xy mod 6 == 0
+   */
+var DATA_MASK_101 = new DataMask._object((int i, int j) => {(i * j) % 6 == 0});
+
+/**
+   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that xy mod 6 < 3
+   */
+
+var DATA_MASK_110 = new DataMask._object((int i, int j) => {((i * j) % 6) < 3});
+
+/**
+   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
+   */
+
+var DATA_MASK_111 =
+    new DataMask._object((int i, int j) => {((i + j + ((i * j) % 3)) & 0x01) == 0});
 
   /**
    * <p>Implementations of this method reverse the data masking process applied to a QR Code and
@@ -48,95 +110,13 @@ abstract class DataMask{
     }
   }
 
-  // TODO:
-  // Try and use mixins to solve the lack of functionality in ENUMS
-
-  bool isMasked(int i, int j);
+  // bool isMasked(int i, int j);
 }
 
-  // See ISO 18004:2006 6.8.1
+// See ISO 18004:2006 6.8.1
 
-  /**
+/**
    * 000: mask bits for which (x + y) mod 2 == 0
    */
-  class DATA_MASK_000 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return ((i + j) & 0x01) == 0;
-    }
-  }
-
-  /**
-   * 001: mask bits for which x mod 2 == 0
-   */
-  class DATA_MASK_001 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return (i & 0x01) == 0;
-    }
-  }
-
-  /**
-   * 010: mask bits for which y mod 3 == 0
-   */
-  class DATA_MASK_010 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return j % 3 == 0;
-    }
-  }
-
-  /**
-   * 011: mask bits for which (x + y) mod 3 == 0
-   */
-  class DATA_MASK_011 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return (i + j) % 3 == 0;
-    }
-  }
-
-  /**
-   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
-   */
-  class DATA_MASK_100 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return (((i / 2) + (j / 3)) & 0x01) == 0;
-    }
-  }
-
-  /**
-   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
-   * equivalently, such that xy mod 6 == 0
-   */
-  class DATA_MASK_101 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return (i * j) % 6 == 0;
-    }
-  }
-
-  /**
-   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that xy mod 6 < 3
-   */
-  class DATA_MASK_110 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return ((i * j) % 6) < 3;
-    }
-  }
-
-  /**
-   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
-   */
-  class DATA_MASK_111 with DataMask {
-    @override
-    bool isMasked(int i, int j) {
-      return ((i + j + ((i * j) % 3)) & 0x01) == 0;
-    }
-  }
 
 
