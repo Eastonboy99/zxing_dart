@@ -61,15 +61,15 @@ class BitMatrixParser {
     // Read top-left format info bits
     int formatInfoBits1 = 0;
     for (int i = 0; i < 6; i++) {
-      formatInfoBits1 = copyBit(i, 8, formatInfoBits1);
+      formatInfoBits1 = _copyBit(i, 8, formatInfoBits1);
     }
     // .. and skip a bit in the timing pattern ...
-    formatInfoBits1 = copyBit(7, 8, formatInfoBits1);
-    formatInfoBits1 = copyBit(8, 8, formatInfoBits1);
-    formatInfoBits1 = copyBit(8, 7, formatInfoBits1);
+    formatInfoBits1 = _copyBit(7, 8, formatInfoBits1);
+    formatInfoBits1 = _copyBit(8, 8, formatInfoBits1);
+    formatInfoBits1 = _copyBit(8, 7, formatInfoBits1);
     // .. and skip a bit in the timing pattern ...
     for (int j = 5; j >= 0; j--) {
-      formatInfoBits1 = copyBit(8, j, formatInfoBits1);
+      formatInfoBits1 = _copyBit(8, j, formatInfoBits1);
     }
 
     // Read the top-right/bottom-left pattern too
@@ -77,10 +77,10 @@ class BitMatrixParser {
     int formatInfoBits2 = 0;
     int jMin = dimension - 7;
     for (int j = dimension - 1; j >= jMin; j--) {
-      formatInfoBits2 = copyBit(8, j, formatInfoBits2);
+      formatInfoBits2 = _copyBit(8, j, formatInfoBits2);
     }
     for (int i = dimension - 8; i < dimension; i++) {
-      formatInfoBits2 = copyBit(i, 8, formatInfoBits2);
+      formatInfoBits2 = _copyBit(i, 8, formatInfoBits2);
     }
 
     _parsedFormatInfo = FormatInformation.decodeFormatInformation(formatInfoBits1, formatInfoBits2);
@@ -105,7 +105,7 @@ class BitMatrixParser {
 
     int dimension = _bitMatrix.getHeight();
 
-    int provisionalVersion = (dimension - 17) / 4;
+    int provisionalVersion = (dimension - 17) ~/ 4;
     if (provisionalVersion <= 6) {
       return Version.getVersionForNumber(provisionalVersion);
     }
@@ -115,7 +115,7 @@ class BitMatrixParser {
     int ijMin = dimension - 11;
     for (int j = 5; j >= 0; j--) {
       for (int i = dimension - 9; i >= ijMin; i--) {
-        versionBits = copyBit(i, j, versionBits);
+        versionBits = _copyBit(i, j, versionBits);
       }
     }
 
@@ -129,7 +129,7 @@ class BitMatrixParser {
     versionBits = 0;
     for (int i = 5; i >= 0; i--) {
       for (int j = dimension - 9; j >= ijMin; j--) {
-        versionBits = copyBit(i, j, versionBits);
+        versionBits = _copyBit(i, j, versionBits);
       }
     }
 

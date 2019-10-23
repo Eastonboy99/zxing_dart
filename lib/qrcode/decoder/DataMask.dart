@@ -58,12 +58,12 @@ class DataMaskClass {
 }
 
 
-class DataMask extends EnumClass{
-  static final _singleton = DataMask._internal("DataMask");
+class DataMaskEnum extends EnumClass{
+  static final _singleton = DataMaskEnum._internal("DataMask");
 
-  DataMask._internal(String name) : super(name);
+  DataMaskEnum._internal(String name) : super(name);
 
-  factory DataMask(){
+  factory DataMaskEnum(){
     return _singleton;
   }
 
@@ -116,3 +116,6 @@ class DataMask extends EnumClass{
 
 
 }
+
+
+ final DataMask =  new DataMaskEnum();
