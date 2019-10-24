@@ -18,6 +18,62 @@
 // import com.google.zxing.FormatException;
 
 
+import 'dart:collection';
+
+class CharacterSetEci {
+
+  static final Map<Int,CharacterSetECI> _VALUE_TO_ECI = new HashMap()
+  static final Map<String,CharacterSetECI> _NAME_TO_ECI = new HashMap();
+
+
+final List<int> _values;
+  final List<String> _otherEncodingNames;
+
+  
+
+  CharacterSetEci(this._values, this._otherEncodingNames){
+
+    for (CharacterSetECI eci in values()) {
+      for (int value in eci._values) {
+        _VALUE_TO_ECI.put(value, eci);
+      }
+      _NAME_TO_ECI.put(eci.name(), eci);
+      for (String name in eci._otherEncodingNames) {
+        _NAME_TO_ECI.put(name, eci);
+      }
+    }
+  
+  }
+
+  int getValue() {
+    return this._values[0];
+  }
+
+  /**
+   * @param value character set ECI value
+   * @return {@code CharacterSetECI} representing ECI of given value, or null if it is legal but
+   *   unsupported
+   * @throws FormatException if ECI value is invalid
+   */
+  static CharacterSetECI getCharacterSetECIByValue(int value) {
+    if (value < 0 || value >= 900) {
+      throw Exception("FormatException");
+    }
+    return _VALUE_TO_ECI[value];
+  }
+
+  /**
+   * @param name character set ECI encoding name
+   * @return CharacterSetECI representing ECI for character encoding, or null if it is legal
+   *   but unsupported
+   */
+  static CharacterSetECI getCharacterSetECIByName(String name) {
+    return NAME_TO_ECI.get(name);
+  }
+
+
+}
+
 
 /**
  * Encapsulates a Character Set ECI, according to "Extended Channel Interpretations" 5.3.1.1
@@ -25,6 +81,8 @@
  *
  * @author Sean Owen
  */
+
+
 enum CharacterSetECI {
 
   // Enum name is a Java encoding valid for java.lang and java.io
@@ -87,30 +145,6 @@ enum CharacterSetECI {
     this.otherEncodingNames = otherEncodingNames;
   }
 
-  public int getValue() {
-    return values[0];
-  }
-
-  /**
-   * @param value character set ECI value
-   * @return {@code CharacterSetECI} representing ECI of given value, or null if it is legal but
-   *   unsupported
-   * @throws FormatException if ECI value is invalid
-   */
-  public static CharacterSetECI getCharacterSetECIByValue(int value) throws FormatException {
-    if (value < 0 || value >= 900) {
-      throw FormatException.getFormatInstance();
-    }
-    return VALUE_TO_ECI.get(value);
-  }
-
-  /**
-   * @param name character set ECI encoding name
-   * @return CharacterSetECI representing ECI for character encoding, or null if it is legal
-   *   but unsupported
-   */
-  public static CharacterSetECI getCharacterSetECIByName(String name) {
-    return NAME_TO_ECI.get(name);
-  }
+  
 
 }
