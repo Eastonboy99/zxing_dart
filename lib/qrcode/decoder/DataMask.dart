@@ -113,9 +113,24 @@ class DataMaskEnum extends EnumClass{
 
   // End of enum constants.
 
+  static final _list = List.from({
+    DataMaskEnum.DATA_MASK_000,
+    DataMaskEnum.DATA_MASK_001,
+    DataMaskEnum.DATA_MASK_010,
+    DataMaskEnum.DATA_MASK_011,
+    DataMaskEnum.DATA_MASK_100,
+    DataMaskEnum.DATA_MASK_101,
+    DataMaskEnum.DATA_MASK_110,
+    DataMaskEnum.DATA_MASK_111,
+  });
 
+  operator [](int index){
+    return DataMaskEnum._list[index];
+  }
 
 }
+
+
 
 
  final DataMask =  new DataMaskEnum();

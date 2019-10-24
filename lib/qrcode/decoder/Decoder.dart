@@ -15,11 +15,18 @@
  */
 
 
+
+import 'dart:typed_data';
+
 import '../../DecodeHintType.dart';
 import '../../common/BitMatrix.dart';
 import '../../common/DecoderResult.dart';
 import '../../common/reedsolomon/GenericGF.dart';
 import '../../common/reedsolomon/ReedSolomonDecoder.dart';
+import 'BitMatrixParser.dart';
+import 'DataBlock.dart';
+import 'ErrorCorrectionLevel.dart';
+import 'Version.dart';
 
 
 
@@ -64,14 +71,13 @@ class Decoder {
 
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
-    FormatException fe;
-    ChecksumException ce = null;
+    Exception fe;
+    Exception ce = null;
     try {
-      return decode(parser, hints);
-    } catch (FormatException e) {
-      fe = e;
-    } catch (ChecksumException e) {
-      ce = e;
+      return decode(parser as BitMatrix, hints);
+    } catch (e) {
+      fe = e; // need to fix this
+      ce = e; // need to fix this
     }
 
     try {
@@ -104,7 +110,7 @@ class Decoder {
 
       return result;
 
-    } catch (FormatException | ChecksumException e) {
+    } catch (e) {
       // Throw the exception from the original reading
       if (fe != null) {
         throw fe;
@@ -113,29 +119,29 @@ class Decoder {
     }
   }
 
-  private DecoderResult decode(BitMatrixParser parser, Map<DecodeHintType,?> hints)
-      throws FormatException, ChecksumException {
+  DecoderResult _decode(BitMatrixParser parser, Map<DecodeHintType, Object> hints)
+      {
     Version version = parser.readVersion();
     ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();
 
     // Read codewords
-    byte[] codewords = parser.readCodewords();
+    Uint8List codewords = parser.readCodewords();
     // Separate into data blocks
-    DataBlock[] dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+    List<DataBlock> dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
 
     // Count total number of data bytes
     int totalBytes = 0;
     for (DataBlock dataBlock : dataBlocks) {
       totalBytes += dataBlock.getNumDataCodewords();
     }
-    byte[] resultBytes = new byte[totalBytes];
+    Uint8List resultBytes = new Uint8List(totalBytes);
     int resultOffset = 0;
 
     // Error-correct and copy data blocks together into a stream of bytes
-    for (DataBlock dataBlock : dataBlocks) {
-      byte[] codewordBytes = dataBlock.getCodewords();
+    for (DataBlock dataBlock in dataBlocks) {
+      Uint8List codewordBytes = dataBlock.getCodewords();
       int numDataCodewords = dataBlock.getNumDataCodewords();
-      correctErrors(codewordBytes, numDataCodewords);
+      _correctErrors(codewordBytes, numDataCodewords);
       for (int i = 0; i < numDataCodewords; i++) {
         resultBytes[resultOffset++] = codewordBytes[i];
       }
@@ -153,22 +159,22 @@ class Decoder {
    * @param numDataCodewords number of codewords that are data bytes
    * @throws ChecksumException if error correction fails
    */
-  private void correctErrors(byte[] codewordBytes, int numDataCodewords) throws ChecksumException {
+  void _correctErrors(Uint8List codewordBytes, int numDataCodewords) {
     int numCodewords = codewordBytes.length;
     // First read into an array of ints
-    int[] codewordsInts = new int[numCodewords];
+    List<int> codewordsInts = new List<int>(numCodewords);
     for (int i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }
     try {
-      rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
-    } catch (ReedSolomonException ignored) {
-      throw ChecksumException.getChecksumInstance();
+      _rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
+    } catch (ignored) {
+      throw Exception("Checksum Exception");
     }
     // Copy back into array of bytes -- only need to worry about the bytes that were data
     // We don't care about errors in the error-correction codewords
     for (int i = 0; i < numDataCodewords; i++) {
-      codewordBytes[i] = (byte) codewordsInts[i];
+      codewordBytes[i] = codewordsInts[i];
     }
   }
 
