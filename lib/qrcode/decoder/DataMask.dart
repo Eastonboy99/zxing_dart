@@ -14,30 +14,71 @@
  * limitations under the License.
  */
 
+import '../../common/BitMatrix.dart';
+
+import '../../common/Enum.dart';
+
+class DataMask<int> extends Enum<int> {
+  final Function isMasked;
+  const DataMask(int val, this.isMasked) : super(val);
+
+  /**
+   * 000: mask bits for which (x + y) mod 2 == 0
+   */
+  static final DATA_MASK_000 =
+      new DataMask(0, (i, j) => {((i + j) & 0x01) == 0});
+
+  /**
+   * 001: mask bits for which x mod 2 == 0
+   */
+  static final DATA_MASK_001 = new DataMask(1, (i, j) => {(i & 0x01) == 0});
+
+  /**
+   * 010: mask bits for which y mod 3 == 0
+   */
+  static final DATA_MASK_010 = new DataMask(2, (i, j) => {j % 3 == 0});
+
+  /**
+   * 011: mask bits for which (x + y) mod 3 == 0
+   */
+  static final DATA_MASK_011 = new DataMask(3, (i, j) => {(i + j) % 3 == 0});
+  /**
+   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
+   */
+  static final DATA_MASK_100 =
+      new DataMask(4, (i, j) => {(((i ~/ 2) + (j ~/ 3)) & 0x01) == 0});
+
+  /**
+   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
+   * equivalently, such that xy mod 6 == 0
+   */
+  static final DATA_MASK_101 = new DataMask(5, (i, j) => {(i * j) % 6 == 0});
+
+  /**
+   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that xy mod 6 < 3
+   */
+  static final DATA_MASK_110 = new DataMask(6, (i, j) => {((i * j) % 6) < 3});
+
+  /**
+   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
+   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
+   */
+  static final DATA_MASK_111 =
+      new DataMask(7, (i, j) => {((i + j + ((i * j) % 3)) & 0x01) == 0});
 
 
-import 'package:built_value/built_value.dart';
+  static final _list = List.from({
+    DATA_MASK_000,
+    DATA_MASK_001,
+    DATA_MASK_010,
+    DATA_MASK_011,
+    DATA_MASK_100,
+    DATA_MASK_101,
+    DATA_MASK_110,
+    DATA_MASK_111
+  });
 
-import "../../common/BitMatrix.dart";
-
-/**
- * <p>Encapsulates data masks for the data bits in a QR code, per ISO 18004:2006 6.8. Implementations
- * of this class can un-mask a raw BitMatrix. For simplicity, they will unmask the entire BitMatrix,
- * including areas used for finder patterns, timing patterns, etc. These areas should be unused
- * after the point they are unmasked anyway.</p>
- *
- * <p>Note that the diagram in section 6.8.1 is misleading since it indicates that i is column position
- * and j is row position. In fact, as the text says, i is row position and j is column position.</p>
- *
- * @author Sean Owen
- */
-
-class DataMaskClass {
-  Function isMasked;
-
-  DataMaskClass(Function isMask){
-    this.isMasked = isMasked;
-  }
   /**
    * <p>Implementations of this method reverse the data masking process applied to a QR Code and
    * make its bits ready to read.</p>
@@ -45,9 +86,9 @@ class DataMaskClass {
    * @param bits representation of QR Code bits
    * @param dimension dimension of QR Code, represented by bits, being unmasked
    */
-  void unmaskBitMatrix(BitMatrix bits, int dimension) {
-    for (int i = 0; i < dimension; i++) {
-      for (int j = 0; j < dimension; j++) {
+  void unmaskBitMatrix(BitMatrix bits, num dimension) {
+    for (var i = 0; i < dimension; i++) {
+      for (var j = 0; j < dimension; j++) {
         if (isMasked(i, j)) {
           bits.flip(j, i);
         }
@@ -55,82 +96,10 @@ class DataMaskClass {
     }
   }
 
-}
-
-
-class DataMaskEnum extends EnumClass{
-  static final _singleton = DataMaskEnum._internal("DataMask");
-
-  DataMaskEnum._internal(String name) : super(name);
-
-  factory DataMaskEnum(){
-    return _singleton;
+  static List<DataMask> values(){
+    return _list;
   }
 
-    // See ISO 18004:2006 6.8.1
-
-  /**
-   * 000: mask bits for which (x + y) mod 2 == 0
-   */
-
-  static final DATA_MASK_000 =  new DataMaskClass((int i, int j) => {((i + j) & 0x01) == 0});
-
-    /**
-   * 001: mask bits for which x mod 2 == 0
-   */
-  static final DATA_MASK_001 =  new DataMaskClass((int i, int j) => {(i & 0x01) == 0});
-
-    /**
-   * 010: mask bits for which y mod 3 == 0
-   */
-  static final DATA_MASK_010 =  new DataMaskClass((int i, int j) => {j % 3 == 0});
-
-  /**
-   * 011: mask bits for which (x + y) mod 3 == 0
-   */
-  static final DATA_MASK_011 =  new DataMaskClass((int i, int j) => {(i + j) % 3 == 0});
-    /**
-   * 100: mask bits for which (x/2 + y/3) mod 2 == 0
-   */
-  static final DATA_MASK_100 =  new DataMaskClass((int i, int j) => {(((i ~/ 2) + (j ~/ 3)) & 0x01) == 0});
-    /**
-   * 101: mask bits for which xy mod 2 + xy mod 3 == 0
-   * equivalently, such that xy mod 6 == 0
-   */
-  static final DATA_MASK_101 =  new DataMaskClass((int i, int j) => {(i * j) % 6 == 0});
-
-    /**
-   * 110: mask bits for which (xy mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that xy mod 6 < 3
-   */
-  static final DATA_MASK_110 =  new DataMaskClass((int i, int j) => {((i * j) % 6) < 3});
-
-  /**
-   * 111: mask bits for which ((x+y)mod 2 + xy mod 3) mod 2 == 0
-   * equivalently, such that (x + y + xy mod 3) mod 2 == 0
-   */
-  static final DATA_MASK_111 =  new DataMaskClass((int i, int j) => {((i + j + ((i * j) % 3)) & 0x01) == 0});
-
-  // End of enum constants.
-
-  static final _list = List.from({
-    DataMaskEnum.DATA_MASK_000,
-    DataMaskEnum.DATA_MASK_001,
-    DataMaskEnum.DATA_MASK_010,
-    DataMaskEnum.DATA_MASK_011,
-    DataMaskEnum.DATA_MASK_100,
-    DataMaskEnum.DATA_MASK_101,
-    DataMaskEnum.DATA_MASK_110,
-    DataMaskEnum.DATA_MASK_111,
-  });
-
-  operator [](int index){
-    return DataMaskEnum._list[index];
-  }
 
 }
 
-
-
-
- final DataMask =  new DataMaskEnum();
