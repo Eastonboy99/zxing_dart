@@ -19,7 +19,7 @@
 import 'dart:typed_data';
 
 import 'package:fixnum/fixnum.dart';
-import 'dart:ffi';
+// import 'dart:ffi';
 
 import '../../utils.dart';
 import 'ErrorCorrectionLevel.dart';
