@@ -30,11 +30,9 @@ import '../ResultPoint.dart';
 import '../common/BitMatrix.dart';
 import '../common/DecoderResult.dart';
 import '../common/DetectorResult.dart';
+import './decoder/Decoder.dart';
+import './decoder/QRCodeDecoderMetaData.dart';
 
-
-
-import com.google.zxing.qrcode.decoder.Decoder;
-import com.google.zxing.qrcode.decoder.QRCodeDecoderMetaData;
 import com.google.zxing.qrcode.detector.Detector;
 
 

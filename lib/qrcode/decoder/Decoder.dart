@@ -25,7 +25,9 @@ import '../../common/reedsolomon/GenericGF.dart';
 import '../../common/reedsolomon/ReedSolomonDecoder.dart';
 import 'BitMatrixParser.dart';
 import 'DataBlock.dart';
+import 'DecodedBitStreamParser.dart';
 import 'ErrorCorrectionLevel.dart';
+import 'QRCodeDecoderMetaData.dart';
 import 'Version.dart';
 
 
@@ -72,7 +74,7 @@ class Decoder {
     // Construct a parser and read version, error-correction level
     BitMatrixParser parser = new BitMatrixParser(bits);
     Exception fe;
-    Exception ce = null;
+    Exception ce;
     try {
       return decode(parser as BitMatrix, hints);
     } catch (e) {
@@ -103,7 +105,7 @@ class Decoder {
       // Prepare for a mirrored reading.
       parser.mirror();
 
-      DecoderResult result = decode(parser, hints);
+      DecoderResult result = _decode(parser, hints);
 
       // Success! Notify the caller that the code was mirrored.
       result.setOther(new QRCodeDecoderMetaData(true));
@@ -131,7 +133,7 @@ class Decoder {
 
     // Count total number of data bytes
     int totalBytes = 0;
-    for (DataBlock dataBlock : dataBlocks) {
+    for (DataBlock dataBlock in dataBlocks) {
       totalBytes += dataBlock.getNumDataCodewords();
     }
     Uint8List resultBytes = new Uint8List(totalBytes);
