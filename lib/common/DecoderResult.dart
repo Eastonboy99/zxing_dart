@@ -24,10 +24,10 @@ import 'dart:typed_data';
  * @author Sean Owen
  */
 class DecoderResult {
-  final Uint64List _rawBytes;
+  final Uint8List _rawBytes;
   int _numBits;
   final String _text;
-  final List<Uint64List> _byteSegments;
+  final List<Uint8List> _byteSegments;
   final String _ecLevel;
   int _errorsCorrected;
   int _erasures;
@@ -40,7 +40,7 @@ class DecoderResult {
   /**
    * @return raw bytes representing the result, or {@code null} if not applicable
    */
-  Uint64List getRawBytes() {
+  Uint8List getRawBytes() {
     return this._rawBytes;
   }
 
@@ -70,7 +70,7 @@ class DecoderResult {
   /**
    * @return list of byte segments in the result, or {@code null} if not applicable
    */
-  List<Uint64List> getByteSegments() {
+  List<Uint8List> getByteSegments() {
     return this._byteSegments;
   }
 

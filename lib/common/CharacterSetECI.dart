@@ -147,7 +147,7 @@ class CharacterSetECI extends Enum<int> {
    *   unsupported
    * @throws FormatException if ECI value is invalid
    */
-  static CharacterSetECI getCharacterSecECIByValue(int value) {
+  static CharacterSetECI getCharacterSetECIByValue(int value) {
     return _VALUE_TO_ECI()[value];
   }
 

@@ -16,6 +16,7 @@
 
 import 'dart:typed_data';
 
+
 import '../../DecodeHintType.dart';
 import '../../common/BitSource.dart';
 import '../../common/CharacterSetECI.dart';
@@ -61,7 +62,7 @@ class DecodedBitStreamParser {
     int parityData = -1;
 
     try {
-      CharacterSetECI currentCharacterSetECI = null;
+      CharacterSetECI currentCharacterSetECI;
       bool fc1InEffect = false;
       Mode mode;
       do {
@@ -72,71 +73,63 @@ class DecodedBitStreamParser {
         } else {
           mode = Mode.forBits(bits.readBits(4)); // mode is encoded by 4 bits
         }
-        switch (mode) {
-          case TERMINATOR:
-            break;
-          case FNC1_FIRST_POSITION:
-          case FNC1_SECOND_POSITION:
-            // We do little with FNC1 except alter the parsed result a bit according to the spec
-            fc1InEffect = true;
-            break;
-          case STRUCTURED_APPEND:
-            if (bits.available() < 16) {
-              throw FormatException.getFormatInstance();
-            }
-            // sequence number and parity is added later to the result metadata
+        
+        if(mode == Mode.TERMINATOR){
+
+        }else if (mode == Mode.FNC1_FIRST_POSITION || mode == Mode.FNC1_SECOND_POSITION){
+          // We do little with FNC1 except alter the parsed result a bit according to the spec
+          fc1InEffect = true;
+        }else if(mode == Mode.STRUCTURED_APPEND){
+          if (bits.available() < 16){
+            throw Exception("Format Exception");
+          }
+                      // sequence number and parity is added later to the result metadata
             // Read next 8 bits (symbol sequence #) and 8 bits (parity data), then continue
             symbolSequence = bits.readBits(8);
             parityData = bits.readBits(8);
-            break;
-          case ECI:
-            // Count doesn't apply to ECI
+        }else if(mode == Mode.ECI){
+          // Count doesn't apply to ECI
             int value = parseECIValue(bits);
             currentCharacterSetECI = CharacterSetECI.getCharacterSetECIByValue(value);
             if (currentCharacterSetECI == null) {
-              throw FormatException.getFormatInstance();
+              throw Exception("Format Exception");
             }
-            break;
-          case HANZI:
-            // First handle Hanzi mode which does not start with character count
+        }else if(mode == Mode.HANZI){
+          // First handle Hanzi mode which does not start with character count
             // Chinese mode contains a sub set indicator right after mode indicator
             int subset = bits.readBits(4);
             int countHanzi = bits.readBits(mode.getCharacterCountBits(version));
-            if (subset == GB2312_SUBSET) {
+            if (subset == _GB2312_SUBSET) {
               decodeHanziSegment(bits, result, countHanzi);
             }
-            break;
-          default:
-            // "Normal" QR code modes:
+        }else{
+          // "Normal" QR code modes:
             // How many characters will follow, encoded in this mode?
             int count = bits.readBits(mode.getCharacterCountBits(version));
-            switch (mode) {
-              case NUMERIC:
+            if (mode == Mode.NUMERIC){
                 decodeNumericSegment(bits, result, count);
-                break;
-              case ALPHANUMERIC:
-                decodeAlphanumericSegment(bits, result, count, fc1InEffect);
-                break;
-              case BYTE:
-                decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints);
-                break;
-              case KANJI:
-                decodeKanjiSegment(bits, result, count);
-                break;
-              default:
-                throw FormatException.getFormatInstance();
+              
+            }else if(mode == Mode.ALPHANUMERIC){
+decodeAlphanumericSegment(bits, result, count, fc1InEffect);
+            }else if (mode == Mode.BYTE){
+              decodeByteSegment(bits, result, count, currentCharacterSetECI, byteSegments, hints);
+            }else if(mode == Mode.KANJI){
+              decodeKanjiSegment(bits, result, count);
+            }else{
+              throw Exception("Format Exception");
             }
-            break;
         }
+
+   
       } while (mode != Mode.TERMINATOR);
-    } catch (IllegalArgumentException iae) {
+    } catch (iae) {
       // from readBits() calls
-      throw FormatException.getFormatInstance();
+      throw Exception("Format Exception");
     }
 
     return new DecoderResult(bytes,
                              result.toString(),
-                             byteSegments.isEmpty() ? null : byteSegments,
+                             byteSegments.isEmpty ? null : byteSegments,
                              ecLevel == null ? null : ecLevel.toString(),
                              symbolSequence,
                              parityData);
@@ -145,22 +138,22 @@ class DecodedBitStreamParser {
   /**
    * See specification GBT 18284-2000
    */
-  private static void decodeHanziSegment(BitSource bits,
-                                         StringBuilder result,
-                                         int count) throws FormatException {
+  static void _decodeHanziSegment(BitSource bits,
+                                         StringBuffer result,
+                                         int count) {
     // Don't crash trying to read more bits than we have available.
     if (count * 13 > bits.available()) {
-      throw FormatException.getFormatInstance();
+      throw Exception("Format Exception");
     }
 
     // Each character will require 2 bytes. Read the characters as 2-byte pairs
     // and decode as GB2312 afterwards
-    byte[] buffer = new byte[2 * count];
+    Uint8List buffer = new Uint8List(2*count);
     int offset = 0;
     while (count > 0) {
       // Each 13 bits encodes a 2-byte character
       int twoBytes = bits.readBits(13);
-      int assembledTwoBytes = ((twoBytes / 0x060) << 8) | (twoBytes % 0x060);
+      int assembledTwoBytes = ((twoBytes ~/ 0x060) << 8) | (twoBytes % 0x060);
       if (assembledTwoBytes < 0x00A00) {
         // In the 0xA1A1 to 0xAAFE range
         assembledTwoBytes += 0x0A1A1;
@@ -168,13 +161,16 @@ class DecodedBitStreamParser {
         // In the 0xB0A1 to 0xFAFE range
         assembledTwoBytes += 0x0A6A1;
       }
-      buffer[offset] = (byte) ((assembledTwoBytes >> 8) & 0xFF);
-      buffer[offset + 1] = (byte) (assembledTwoBytes & 0xFF);
+      buffer[offset] = ((assembledTwoBytes >> 8) & 0xFF);
+      buffer[offset + 1] = (assembledTwoBytes & 0xFF);
       offset += 2;
       count--;
     }
+//TODO: Figure out how to Create string with specific Charset
 
     try {
+      result.
+      result.write();
       result.append(new String(buffer, StringUtils.GB2312));
     } catch (UnsupportedEncodingException ignored) {
       throw FormatException.getFormatInstance();
