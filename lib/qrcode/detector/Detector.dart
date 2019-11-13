@@ -21,21 +21,18 @@ import '../../ResultPointCallback.dart';
 import '../../common/BitMatrix.dart';
 import '../../common/DetectorResult.dart';
 import '../../common/GridSampler.dart';
+import '../../ResultPointCallback.dart';
+import '../../common/BitMatrix.dart';
+import '../../common/DetectorResult.dart';
+import '../../common/GridSampler.dart';
+import '../../common/PerspectiveTransform.dart';
+import '../../common/detector/MathUtils.dart';
+import '../../qrcode/decoder/Version.dart';
 
 
-import com.google.zxing.FormatException;
-import com.google.zxing.NotFoundException;
+// import com.google.zxing.FormatException;
+// import com.google.zxing.NotFoundException;
 
-
-import com.google.zxing.ResultPointCallback;
-import com.google.zxing.common.BitMatrix;
-import com.google.zxing.common.DetectorResult;
-import com.google.zxing.common.GridSampler;
-import com.google.zxing.common.PerspectiveTransform;
-import com.google.zxing.common.detector.MathUtils;
-import com.google.zxing.qrcode.decoder.Version;
-
-import java.util.Map;
 
 /**
  * <p>Encapsulates logic that can detect a QR Code in an image, even if the QR Code
