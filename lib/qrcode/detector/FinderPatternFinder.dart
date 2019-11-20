@@ -19,6 +19,8 @@ import '../../DecodeHintType.dart';
 import '../../ResultPoint.dart';
 import '../../ResultPointCallback.dart';
 import '../../common/BitMatrix.dart';
+import 'FinderPattern.dart';
+import 'FinderPatternInfo.dart';
 
 // import com.google.zxing.NotFoundException;
 
@@ -38,40 +40,37 @@ class FinderPatternFinder {
   static final int _MIN_SKIP = 3; // 1 pixel/module times 3 modules/center
   static final int _MAX_MODULES = 97; // support up to version 20 for mobile clients
 
-  final BitMatrix _image;
-  final List<FinderPattern> _possibleCenters;
+  BitMatrix _image;
+  List<FinderPattern> _possibleCenters;
   bool _hasSkipped;
-  final List<int> _crossCheckStateCount;
-  final ResultPointCallback _resultPointCallback;
+  List<int> _crossCheckStateCount;
+  ResultPointCallback _resultPointCallback;
 
   /**
    * <p>Creates a finder that will search the image for three finder patterns.</p>
    *
    * @param image image to search
    */
-  public FinderPatternFinder(BitMatrix image) {
-    this(image, null);
+
+  FinderPatternFinder(BitMatrix image, [ResultPointCallback resultPointCallback]) {
+    this._image = image;
+    this._possibleCenters = new List();
+    this._crossCheckStateCount = new List<int>(5);
+    this._resultPointCallback = resultPointCallback;
   }
 
-  public FinderPatternFinder(BitMatrix image, ResultPointCallback resultPointCallback) {
-    this.image = image;
-    this.possibleCenters = new ArrayList<>();
-    this.crossCheckStateCount = new int[5];
-    this.resultPointCallback = resultPointCallback;
+  BitMatrix getImage() {
+    return _image;
   }
 
-  protected final BitMatrix getImage() {
-    return image;
+  List<FinderPattern> getPossibleCenters() {
+    return _possibleCenters;
   }
 
-  protected final List<FinderPattern> getPossibleCenters() {
-    return possibleCenters;
-  }
-
-  final FinderPatternInfo find(Map<DecodeHintType,?> hints) throws NotFoundException {
-    boolean tryHarder = hints != null && hints.containsKey(DecodeHintType.TRY_HARDER);
-    int maxI = image.getHeight();
-    int maxJ = image.getWidth();
+  FinderPatternInfo find(Map<DecodeHintType,Object> hints) {
+    bool tryHarder = hints != null && hints.containsKey(DecodeHintType.TRY_HARDER);
+    int maxI = _image.getHeight();
+    int maxJ = _image.getWidth();
     // We are looking for black/white/black/white/black modules in
     // 1:1:3:1:1 ratio; this tracks the number of such modules seen so far
 
@@ -79,19 +78,19 @@ class FinderPatternFinder {
     // image, and then account for the center being 3 modules in size. This gives the smallest
     // number of pixels the center could be, so skip this often. When trying harder, look for all
     // QR versions regardless of how dense they are.
-    int iSkip = (3 * maxI) / (4 * MAX_MODULES);
-    if (iSkip < MIN_SKIP || tryHarder) {
-      iSkip = MIN_SKIP;
+    int iSkip = (3 * maxI) ~/ (4 * _MAX_MODULES);
+    if (iSkip < _MIN_SKIP || tryHarder) {
+      iSkip = _MIN_SKIP;
     }
 
-    boolean done = false;
-    int[] stateCount = new int[5];
+    bool done = false;
+    List<int> stateCount = new List<int>(5);
     for (int i = iSkip - 1; i < maxI && !done; i += iSkip) {
       // Get a row of black/white values
       clearCounts(stateCount);
       int currentState = 0;
       for (int j = 0; j < maxJ; j++) {
-        if (image.get(j, i)) {
+        if (_image.get(j, i)) {
           // Black pixel
           if ((currentState & 1) == 1) { // Counting white pixels
             currentState++;
@@ -101,15 +100,15 @@ class FinderPatternFinder {
           if ((currentState & 1) == 0) { // Counting black pixels
             if (currentState == 4) { // A winner?
               if (foundPatternCross(stateCount)) { // Yes
-                boolean confirmed = handlePossibleCenter(stateCount, i, j);
+                bool confirmed = handlePossibleCenter(stateCount, i, j);
                 if (confirmed) {
                   // Start examining every other line. Checking each line turned out to be too
                   // expensive and didn't improve performance.
                   iSkip = 2;
-                  if (hasSkipped) {
-                    done = haveMultiplyConfirmedCenters();
+                  if (_hasSkipped) {
+                    done = _haveMultiplyConfirmedCenters();
                   } else {
-                    int rowSkip = findRowSkip();
+                    int rowSkip = _findRowSkip();
                     if (rowSkip > stateCount[2]) {
                       // Skip rows between row of lower confirmed center
                       // and top of presumed third confirmed center
@@ -144,18 +143,18 @@ class FinderPatternFinder {
         }
       }
       if (foundPatternCross(stateCount)) {
-        boolean confirmed = handlePossibleCenter(stateCount, i, maxJ);
+        bool confirmed = handlePossibleCenter(stateCount, i, maxJ);
         if (confirmed) {
           iSkip = stateCount[0];
-          if (hasSkipped) {
+          if (_hasSkipped) {
             // Found a third one
-            done = haveMultiplyConfirmedCenters();
+            done = _haveMultiplyConfirmedCenters();
           }
         }
       }
     }
 
-    FinderPattern[] patternInfo = selectBestPatterns();
+    List<FinderPattern> patternInfo = _selectBestPatterns();
     ResultPoint.orderBestPatterns(patternInfo);
 
     return new FinderPatternInfo(patternInfo);
@@ -165,8 +164,8 @@ class FinderPatternFinder {
    * Given a count of black/white/black/white/black pixels just seen and an end position,
    * figures the location of the center of this run.
    */
-  private static float centerFromEnd(int[] stateCount, int end) {
-    return (end - stateCount[4] - stateCount[3]) - stateCount[2] / 2.0f;
+  static double _centerFromEnd(List<int> stateCount, int end) {
+    return (end - stateCount[4] - stateCount[3]) - stateCount[2] / 2.0;
   }
 
   /**
@@ -174,7 +173,7 @@ class FinderPatternFinder {
    * @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
    *         used by finder patterns to be considered a match
    */
-  protected static boolean foundPatternCross(int[] stateCount) {
+  static bool foundPatternCross(List<int> stateCount) {
     int totalModuleSize = 0;
     for (int i = 0; i < 5; i++) {
       int count = stateCount[i];
@@ -186,15 +185,15 @@ class FinderPatternFinder {
     if (totalModuleSize < 7) {
       return false;
     }
-    float moduleSize = totalModuleSize / 7.0f;
-    float maxVariance = moduleSize / 2.0f;
+    double moduleSize = totalModuleSize / 7.0;
+    double maxVariance = moduleSize / 2.0;
     // Allow less than 50% variance from 1-1-3-1-1 proportions
     return
-        Math.abs(moduleSize - stateCount[0]) < maxVariance &&
-        Math.abs(moduleSize - stateCount[1]) < maxVariance &&
-        Math.abs(3.0f * moduleSize - stateCount[2]) < 3 * maxVariance &&
-        Math.abs(moduleSize - stateCount[3]) < maxVariance &&
-        Math.abs(moduleSize - stateCount[4]) < maxVariance;
+        (moduleSize - stateCount[0]).abs() < maxVariance &&
+        (moduleSize - stateCount[1]).abs() < maxVariance &&
+        (3.0 * moduleSize - stateCount[2]).abs() < 3 * maxVariance &&
+        (moduleSize - stateCount[3]).abs() < maxVariance &&
+        (moduleSize - stateCount[4]).abs() < maxVariance;
   }
 
   /**
@@ -202,7 +201,7 @@ class FinderPatternFinder {
    * @return true iff the proportions of the counts is close enough to the 1/1/3/1/1 ratios
    *         used by finder patterns to be considered a match
    */
-  protected static boolean foundPatternDiagonal(int[] stateCount) {
+  static bool foundPatternDiagonal(List<int> stateCount) {
     int totalModuleSize = 0;
     for (int i = 0; i < 5; i++) {
       int count = stateCount[i];
@@ -214,27 +213,27 @@ class FinderPatternFinder {
     if (totalModuleSize < 7) {
       return false;
     }
-    float moduleSize = totalModuleSize / 7.0f;
-    float maxVariance = moduleSize / 1.333f;
+    double moduleSize = totalModuleSize / 7.0;
+    double maxVariance = moduleSize / 1.333;
     // Allow less than 75% variance from 1-1-3-1-1 proportions
     return
-            Math.abs(moduleSize - stateCount[0]) < maxVariance &&
-                    Math.abs(moduleSize - stateCount[1]) < maxVariance &&
-                    Math.abs(3.0f * moduleSize - stateCount[2]) < 3 * maxVariance &&
-                    Math.abs(moduleSize - stateCount[3]) < maxVariance &&
-                    Math.abs(moduleSize - stateCount[4]) < maxVariance;
+            (moduleSize - stateCount[0]).abs() < maxVariance &&
+                    (moduleSize - stateCount[1]).abs() < maxVariance &&
+                    (3.0 * moduleSize - stateCount[2]).abs() < 3 * maxVariance &&
+                    (moduleSize - stateCount[3]).abs() < maxVariance &&
+                    (moduleSize - stateCount[4]).abs() < maxVariance;
   }
 
-  private int[] getCrossCheckStateCount() {
-    clearCounts(crossCheckStateCount);
-    return crossCheckStateCount;
+  List<int> _getCrossCheckStateCount() {
+    clearCounts(_crossCheckStateCount);
+    return _crossCheckStateCount;
   }
 
-  protected final void clearCounts(int[] counts) {
-    Arrays.fill(counts, 0);
+  void clearCounts(List<int> counts) {
+    counts.fillRange(0, counts.length, 0);
   }
 
-  protected final void shiftCounts2(int[] stateCount) {
+  void shiftCounts2(List<int> stateCount) {
     stateCount[0] = stateCount[2];
     stateCount[1] = stateCount[3];
     stateCount[2] = stateCount[4];
@@ -251,12 +250,12 @@ class FinderPatternFinder {
    * @param centerJ center of the section that appears to cross a finder pattern
    * @return true if proportions are withing expected limits
    */
-  private boolean crossCheckDiagonal(int centerI, int centerJ) {
-    int[] stateCount = getCrossCheckStateCount();
+  bool _crossCheckDiagonal(int centerI, int centerJ) {
+    List<int> stateCount = _getCrossCheckStateCount();
 
     // Start counting up, left from center finding black center mass
     int i = 0;
-    while (centerI >= i && centerJ >= i && image.get(centerJ - i, centerI - i)) {
+    while (centerI >= i && centerJ >= i && _image.get(centerJ - i, centerI - i)) {
       stateCount[2]++;
       i++;
     }
@@ -265,7 +264,7 @@ class FinderPatternFinder {
     }
 
     // Continue up, left finding white space
-    while (centerI >= i && centerJ >= i && !image.get(centerJ - i, centerI - i)) {
+    while (centerI >= i && centerJ >= i && !_image.get(centerJ - i, centerI - i)) {
       stateCount[1]++;
       i++;
     }
@@ -274,7 +273,7 @@ class FinderPatternFinder {
     }
 
     // Continue up, left finding black border
-    while (centerI >= i && centerJ >= i && image.get(centerJ - i, centerI - i)) {
+    while (centerI >= i && centerJ >= i && _image.get(centerJ - i, centerI - i)) {
       stateCount[0]++;
       i++;
     }
@@ -282,17 +281,17 @@ class FinderPatternFinder {
       return false;
     }
 
-    int maxI = image.getHeight();
-    int maxJ = image.getWidth();
+    int maxI = _image.getHeight();
+    int maxJ = _image.getWidth();
 
     // Now also count down, right from center
     i = 1;
-    while (centerI + i < maxI && centerJ + i < maxJ && image.get(centerJ + i, centerI + i)) {
+    while (centerI + i < maxI && centerJ + i < maxJ && _image.get(centerJ + i, centerI + i)) {
       stateCount[2]++;
       i++;
     }
 
-    while (centerI + i < maxI && centerJ + i < maxJ && !image.get(centerJ + i, centerI + i)) {
+    while (centerI + i < maxI && centerJ + i < maxJ && !_image.get(centerJ + i, centerI + i)) {
       stateCount[3]++;
       i++;
     }
@@ -300,7 +299,7 @@ class FinderPatternFinder {
       return false;
     }
 
-    while (centerI + i < maxI && centerJ + i < maxJ && image.get(centerJ + i, centerI + i)) {
+    while (centerI + i < maxI && centerJ + i < maxJ && _image.get(centerJ + i, centerI + i)) {
       stateCount[4]++;
       i++;
     }
@@ -322,12 +321,12 @@ class FinderPatternFinder {
    * observed in any reading state, based on the results of the horizontal scan
    * @return vertical center of finder pattern, or {@link Float#NaN} if not found
    */
-  private float crossCheckVertical(int startI, int centerJ, int maxCount,
+  double _crossCheckVertical(int startI, int centerJ, int maxCount,
       int originalStateCountTotal) {
-    BitMatrix image = this.image;
+    BitMatrix image = this._image;
 
     int maxI = image.getHeight();
-    int[] stateCount = getCrossCheckStateCount();
+    List<int> stateCount = _getCrossCheckStateCount();
 
     // Start counting up from center
     int i = startI;
@@ -336,7 +335,7 @@ class FinderPatternFinder {
       i--;
     }
     if (i < 0) {
-      return Float.NaN;
+      return double.nan;
     }
     while (i >= 0 && !image.get(centerJ, i) && stateCount[1] <= maxCount) {
       stateCount[1]++;
@@ -344,14 +343,14 @@ class FinderPatternFinder {
     }
     // If already too many modules in this state or ran off the edge:
     if (i < 0 || stateCount[1] > maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
     while (i >= 0 && image.get(centerJ, i) && stateCount[0] <= maxCount) {
       stateCount[0]++;
       i--;
     }
     if (stateCount[0] > maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
 
     // Now also count down from center
@@ -361,32 +360,32 @@ class FinderPatternFinder {
       i++;
     }
     if (i == maxI) {
-      return Float.NaN;
+      return double.nan;
     }
     while (i < maxI && !image.get(centerJ, i) && stateCount[3] < maxCount) {
       stateCount[3]++;
       i++;
     }
     if (i == maxI || stateCount[3] >= maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
     while (i < maxI && image.get(centerJ, i) && stateCount[4] < maxCount) {
       stateCount[4]++;
       i++;
     }
     if (stateCount[4] >= maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
 
     // If we found a finder-pattern-like section, but its size is more than 40% different than
     // the original, assume it's a false positive
     int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] +
         stateCount[4];
-    if (5 * Math.abs(stateCountTotal - originalStateCountTotal) >= 2 * originalStateCountTotal) {
-      return Float.NaN;
+    if (5 * (stateCountTotal - originalStateCountTotal).abs() >= 2 * originalStateCountTotal) {
+      return double.nan;
     }
 
-    return foundPatternCross(stateCount) ? centerFromEnd(stateCount, i) : Float.NaN;
+    return foundPatternCross(stateCount) ? _centerFromEnd(stateCount, i) : double.nan;
   }
 
   /**
@@ -394,12 +393,12 @@ class FinderPatternFinder {
    * except it reads horizontally instead of vertically. This is used to cross-cross
    * check a vertical cross check and locate the real center of the alignment pattern.</p>
    */
-  private float crossCheckHorizontal(int startJ, int centerI, int maxCount,
+  double _crossCheckHorizontal(int startJ, int centerI, int maxCount,
       int originalStateCountTotal) {
-    BitMatrix image = this.image;
+    BitMatrix image = this._image;
 
     int maxJ = image.getWidth();
-    int[] stateCount = getCrossCheckStateCount();
+    List<int> stateCount = _getCrossCheckStateCount();
 
     int j = startJ;
     while (j >= 0 && image.get(j, centerI)) {
@@ -407,21 +406,21 @@ class FinderPatternFinder {
       j--;
     }
     if (j < 0) {
-      return Float.NaN;
+      return double.nan;
     }
     while (j >= 0 && !image.get(j, centerI) && stateCount[1] <= maxCount) {
       stateCount[1]++;
       j--;
     }
     if (j < 0 || stateCount[1] > maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
     while (j >= 0 && image.get(j, centerI) && stateCount[0] <= maxCount) {
       stateCount[0]++;
       j--;
     }
     if (stateCount[0] > maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
 
     j = startJ + 1;
@@ -430,47 +429,47 @@ class FinderPatternFinder {
       j++;
     }
     if (j == maxJ) {
-      return Float.NaN;
+      return double.nan;
     }
     while (j < maxJ && !image.get(j, centerI) && stateCount[3] < maxCount) {
       stateCount[3]++;
       j++;
     }
     if (j == maxJ || stateCount[3] >= maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
     while (j < maxJ && image.get(j, centerI) && stateCount[4] < maxCount) {
       stateCount[4]++;
       j++;
     }
     if (stateCount[4] >= maxCount) {
-      return Float.NaN;
+      return double.nan;
     }
 
     // If we found a finder-pattern-like section, but its size is significantly different than
     // the original, assume it's a false positive
     int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] +
         stateCount[4];
-    if (5 * Math.abs(stateCountTotal - originalStateCountTotal) >= originalStateCountTotal) {
-      return Float.NaN;
+    if (5 * (stateCountTotal - originalStateCountTotal).abs() >= originalStateCountTotal) {
+      return double.nan;
     }
 
-    return foundPatternCross(stateCount) ? centerFromEnd(stateCount, j) : Float.NaN;
+    return foundPatternCross(stateCount) ? _centerFromEnd(stateCount, j) : double.nan;
   }
 
-  /**
-   * @param stateCount reading state module counts from horizontal scan
-   * @param i row where finder pattern may be found
-   * @param j end of possible finder pattern in row
-   * @param pureBarcode ignored
-   * @return true if a finder pattern candidate was found this time
-   * @deprecated only exists for backwards compatibility
-   * @see #handlePossibleCenter(int[], int, int)
-   */
-  @Deprecated
-  protected final boolean handlePossibleCenter(int[] stateCount, int i, int j, boolean pureBarcode) {
-    return handlePossibleCenter(stateCount, i, j);
-  }
+  // /**
+  //  * @param stateCount reading state module counts from horizontal scan
+  //  * @param i row where finder pattern may be found
+  //  * @param j end of possible finder pattern in row
+  //  * @param pureBarcode ignored
+  //  * @return true if a finder pattern candidate was found this time
+  //  * @deprecated only exists for backwards compatibility
+  //  * @see #handlePossibleCenter(int[], int, int)
+  //  */
+  // @deprecated
+  // bool handlePossibleCenter(List<int> stateCount, int i, int j, bool pureBarcode) {
+  //   return handlePossibleCenter(stateCount, i, j);
+  // }
 
   /**
    * <p>This is called when a horizontal scan finds a possible alignment pattern. It will
@@ -489,31 +488,31 @@ class FinderPatternFinder {
    * @param j end of possible finder pattern in row
    * @return true if a finder pattern candidate was found this time
    */
-  protected final boolean handlePossibleCenter(int[] stateCount, int i, int j) {
+  bool handlePossibleCenter(List<int> stateCount, int i, int j, [bool pureBarcode]) {
     int stateCountTotal = stateCount[0] + stateCount[1] + stateCount[2] + stateCount[3] +
         stateCount[4];
-    float centerJ = centerFromEnd(stateCount, j);
-    float centerI = crossCheckVertical(i, (int) centerJ, stateCount[2], stateCountTotal);
-    if (!Float.isNaN(centerI)) {
+    double centerJ = _centerFromEnd(stateCount, j);
+    double centerI = _crossCheckVertical(i, centerJ.toInt(), stateCount[2], stateCountTotal);
+    if (!(centerI).isNaN) {
       // Re-cross check
-      centerJ = crossCheckHorizontal((int) centerJ, (int) centerI, stateCount[2], stateCountTotal);
-      if (!Float.isNaN(centerJ) && crossCheckDiagonal((int) centerI, (int) centerJ)) {
-        float estimatedModuleSize = stateCountTotal / 7.0f;
-        boolean found = false;
-        for (int index = 0; index < possibleCenters.size(); index++) {
-          FinderPattern center = possibleCenters.get(index);
+      centerJ = _crossCheckHorizontal(centerJ.toInt(), centerI.toInt(), stateCount[2], stateCountTotal);
+      if (!(centerJ).isNaN && _crossCheckDiagonal(centerI.toInt(), centerJ.toInt())) {
+        double estimatedModuleSize = stateCountTotal / 7.0;
+        bool found = false;
+        for (int index = 0; index < _possibleCenters.length; index++) {
+          FinderPattern center = _possibleCenters[index];
           // Look for about the same center and module size:
           if (center.aboutEquals(estimatedModuleSize, centerI, centerJ)) {
-            possibleCenters.set(index, center.combineEstimate(centerI, centerJ, estimatedModuleSize));
+            _possibleCenters[index] = center.combineEstimate(centerI, centerJ, estimatedModuleSize);
             found = true;
             break;
           }
         }
         if (!found) {
           FinderPattern point = new FinderPattern(centerJ, centerI, estimatedModuleSize);
-          possibleCenters.add(point);
-          if (resultPointCallback != null) {
-            resultPointCallback.foundPossibleResultPoint(point);
+          _possibleCenters.add(point);
+          if (_resultPointCallback != null) {
+            _resultPointCallback.foundPossibleResultPoint(point);
           }
         }
         return true;
@@ -528,14 +527,14 @@ class FinderPatternFinder {
    *         allow us to infer that the third pattern must lie below a certain point farther
    *         down in the image.
    */
-  private int findRowSkip() {
-    int max = possibleCenters.size();
+  int _findRowSkip() {
+    int max = _possibleCenters.length;
     if (max <= 1) {
       return 0;
     }
     ResultPoint firstConfirmedCenter = null;
-    for (FinderPattern center : possibleCenters) {
-      if (center.getCount() >= CENTER_QUORUM) {
+    for (FinderPattern center in _possibleCenters) {
+      if (center.getCount() >= _CENTER_QUORUM) {
         if (firstConfirmedCenter == null) {
           firstConfirmedCenter = center;
         } else {
@@ -544,9 +543,8 @@ class FinderPatternFinder {
           // pattern? In the worst case, only the difference between the
           // difference in the x / y coordinates of the two centers.
           // This is the case where you find top left last.
-          hasSkipped = true;
-          return (int) (Math.abs(firstConfirmedCenter.getX() - center.getX()) -
-              Math.abs(firstConfirmedCenter.getY() - center.getY())) / 2;
+          _hasSkipped = true;
+          return ((firstConfirmedCenter.getX() - center.getX()).abs() - (firstConfirmedCenter.getY() - center.getY()).abs()).toInt() ~/ 2;
         }
       }
     }
@@ -558,12 +556,12 @@ class FinderPatternFinder {
    *         at least {@link #CENTER_QUORUM} times each, and, the estimated module size of the
    *         candidates is "pretty similar"
    */
-  private boolean haveMultiplyConfirmedCenters() {
+  bool _haveMultiplyConfirmedCenters() {
     int confirmedCount = 0;
-    float totalModuleSize = 0.0f;
-    int max = possibleCenters.size();
-    for (FinderPattern pattern : possibleCenters) {
-      if (pattern.getCount() >= CENTER_QUORUM) {
+    double totalModuleSize = 0.0;
+    int max = _possibleCenters.length;
+    for (FinderPattern pattern in _possibleCenters) {
+      if (pattern.getCount() >= _CENTER_QUORUM) {
         confirmedCount++;
         totalModuleSize += pattern.getEstimatedModuleSize();
       }
@@ -575,18 +573,18 @@ class FinderPatternFinder {
     // and that we need to keep looking. We detect this by asking if the estimated module sizes
     // vary too much. We arbitrarily say that when the total deviation from average exceeds
     // 5% of the total module size estimates, it's too much.
-    float average = totalModuleSize / max;
-    float totalDeviation = 0.0f;
-    for (FinderPattern pattern : possibleCenters) {
-      totalDeviation += Math.abs(pattern.getEstimatedModuleSize() - average);
+    double average = totalModuleSize / max;
+    double totalDeviation = 0.0;
+    for (FinderPattern pattern in _possibleCenters) {
+      totalDeviation += (pattern.getEstimatedModuleSize() - average).abs();
     }
-    return totalDeviation <= 0.05f * totalModuleSize;
+    return totalDeviation <= 0.05 * totalModuleSize;
   }
 
   /**
    * Get square of distance between a and b.
    */
-  private static double squaredDistance(FinderPattern a, FinderPattern b) {
+  static double _squaredDistance(FinderPattern a, FinderPattern b) {
     double x = a.getX() - b.getX();
     double y = a.getY() - b.getY();
     return x * x + y * y;
@@ -597,47 +595,47 @@ class FinderPatternFinder {
    *         those have similar module size and form a shape closer to a isosceles right triangle.
    * @throws NotFoundException if 3 such finder patterns do not exist
    */
-  private FinderPattern[] selectBestPatterns() throws NotFoundException {
+  List<FinderPattern> _selectBestPatterns() {
 
-    int startSize = possibleCenters.size();
+    int startSize = _possibleCenters.length;
     if (startSize < 3) {
       // Couldn't find enough finder patterns
-      throw NotFoundException.getNotFoundInstance();
+      throw Exception("Not Found Exception");
     }
 
-    possibleCenters.sort(moduleComparator);
+    _possibleCenters.sort(_moduleComparator.compare);
 
-    double distortion = Double.MAX_VALUE;
-    double[] squares = new double[3];
-    FinderPattern[] bestPatterns = new FinderPattern[3];
+    double distortion = double.maxFinite;
+    List<double> squares = new List<double>(3);
+    List<FinderPattern> bestPatterns = new List<FinderPattern>(3);
 
-    for (int i = 0; i < possibleCenters.size() - 2; i++) {
-      FinderPattern fpi = possibleCenters.get(i);
-      float minModuleSize = fpi.getEstimatedModuleSize();
+    for (int i = 0; i < _possibleCenters.length - 2; i++) {
+      FinderPattern fpi = _possibleCenters[i];
+      double minModuleSize = fpi.getEstimatedModuleSize();
 
-      for (int j = i + 1; j < possibleCenters.size() - 1; j++) {
-        FinderPattern fpj = possibleCenters.get(j);
-        double squares0 = squaredDistance(fpi, fpj);
+      for (int j = i + 1; j < _possibleCenters.length - 1; j++) {
+        FinderPattern fpj = _possibleCenters[j];
+        double squares0 = _squaredDistance(fpi, fpj);
 
-        for (int k = j + 1; k < possibleCenters.size(); k++) {
-          FinderPattern fpk = possibleCenters.get(k);
-          float maxModuleSize = fpk.getEstimatedModuleSize();
-          if (maxModuleSize > minModuleSize * 1.4f) {
+        for (int k = j + 1; k < _possibleCenters.length; k++) {
+          FinderPattern fpk = _possibleCenters[k];
+          double maxModuleSize = fpk.getEstimatedModuleSize();
+          if (maxModuleSize > minModuleSize * 1.4) {
             // module size is not similar
             continue;
           }
 
           squares[0] = squares0;
-          squares[1] = squaredDistance(fpj, fpk);
-          squares[2] = squaredDistance(fpi, fpk);
-          Arrays.sort(squares);
+          squares[1] = _squaredDistance(fpj, fpk);
+          squares[2] = _squaredDistance(fpi, fpk);
+          squares.sort();
 
           // a^2 + b^2 = c^2 (Pythagorean theorem), and a = b (isosceles triangle).
           // Since any right triangle satisfies the formula c^2 - b^2 - a^2 = 0,
           // we need to check both two equal sides separately.
           // The value of |c^2 - 2 * b^2| + |c^2 - 2 * a^2| increases as dissimilarity
           // from isosceles right triangle.
-          double d = Math.abs(squares[2] - 2 * squares[1]) + Math.abs(squares[2] - 2 * squares[0]);
+          double d = (squares[2] - 2 * squares[1]).abs() + (squares[2] - 2 * squares[0]).abs();
           if (d < distortion) {
             distortion = d;
             bestPatterns[0] = fpi;
@@ -648,21 +646,21 @@ class FinderPatternFinder {
       }
     }
 
-    if (distortion == Double.MAX_VALUE) {
-        throw NotFoundException.getNotFoundInstance();
+    if (distortion == double.maxFinite) {
+        throw Exception("Not Found Exception");
     }
 
     return bestPatterns;
   }
 
+}
+
   /**
    * <p>Orders by {@link FinderPattern#getEstimatedModuleSize()}</p>
    */
-  private static final class EstimatedModuleComparator implements Comparator<FinderPattern>, Serializable {
-    @Override
-    public int compare(FinderPattern center1, FinderPattern center2) {
-      return Float.compare(center1.getEstimatedModuleSize(), center2.getEstimatedModuleSize());
+  class EstimatedModuleComparator {
+    
+    int compare(FinderPattern center1, FinderPattern center2) {
+      return center1.getEstimatedModuleSize().compareTo(center2.getEstimatedModuleSize());
     }
   }
-
-}

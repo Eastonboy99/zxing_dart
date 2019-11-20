@@ -27,7 +27,7 @@ import 'ResultMetadataType.dart';
  */
 class Result {
   final String _text;
-  final Uint64List _rawBytes;
+  final Uint8List _rawBytes;
   int _numBits;
   List<ResultPoint> _resultPoints;
   final BarcodeFormat _format;
@@ -52,7 +52,7 @@ class Result {
    * @return raw bytes encoded by the barcode, if applicable, otherwise
    *         {@code null}
    */
-  Uint64List getRawBytes() {
+  Uint8List getRawBytes() {
     return this._rawBytes;
   }
 

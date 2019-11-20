@@ -16,7 +16,6 @@
 
 import 'FinderPattern.dart';
 
-package com.google.zxing.qrcode.detector;
 
 /**
  * <p>Encapsulates information about finder patterns in an image, including the location of

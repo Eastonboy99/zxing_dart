@@ -32,8 +32,7 @@ import '../common/DecoderResult.dart';
 import '../common/DetectorResult.dart';
 import './decoder/Decoder.dart';
 import './decoder/QRCodeDecoderMetaData.dart';
-
-import com.google.zxing.qrcode.detector.Detector;
+import './detector/Detector.dart';
 
 
 /**
@@ -71,7 +70,7 @@ Result decode(BinaryBitmap image, {Map<DecodeHintType, Object> hints})
       decoderResult = this._decoder.decode(bits, hints);
       points = QRCodeReader._NO_POINTS;
     } else {
-      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);
+      DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints: hints);
       decoderResult = this._decoder.decode(detectorResult.getBits(), hints);
       points = detectorResult.getPoints();
     }
@@ -82,7 +81,7 @@ Result decode(BinaryBitmap image, {Map<DecodeHintType, Object> hints})
     }
 
     Result result = new Result(decoderResult.getText(), decoderResult.getRawBytes(), points, BarcodeFormat.QR_CODE);
-    List<Uint64List> byteSegments = decoderResult.getByteSegments();
+    List<Uint8List> byteSegments = decoderResult.getByteSegments();
     if (byteSegments != null) {
       result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
     }
