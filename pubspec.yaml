@@ -13,6 +13,7 @@ dependencies:
   fixnum: ^0.10.9
   collection: any
   built_value: ^6.7.1
+  image: ^2.1.9
 
 dev_dependencies:
   flutter_test:

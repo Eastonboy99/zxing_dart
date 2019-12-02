@@ -57,12 +57,12 @@ if(transform != null){
       transform.transformPoints(points: points);
       // Quick check to see if points transformed to something inside the image;
       // sufficient to check the endpoints
-      checkAndNudgePoints(image, points);
+      GridSampler.checkAndNudgePoints(image, points);
       try {
         for (int x = 0; x < max; x += 2) {
-          if (image.get(points[x], points[x + 1]) {
+          if (image.get(points[x].toInt(), points[x + 1].toInt())) {
             // Black(-ish) pixel
-            bits.set(x / 2, y);
+            bits.set(x ~/ 2, y);
           }
         }
       } catch (aioobe) {
