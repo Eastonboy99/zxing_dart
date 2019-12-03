@@ -15,9 +15,6 @@
  */
 
 import 'dart:typed_data';
-
-import 'package:flutter/services.dart';
-
 import 'InvertedLuminanceSource.dart';
 
 abstract class LuminanceSource{
@@ -39,7 +36,7 @@ abstract class LuminanceSource{
    *            Always use the returned object, and ignore the .length of the array.
    * @return An array containing the luminance data.
    */
-  Uint8List getRow(int y, Uint8List row);
+  Uint8ClampedList getRow(int y, Uint8ClampedList row);
 
     /**
    * Fetches luminance data for the underlying bitmap. Values should be fetched using:
@@ -49,7 +46,7 @@ abstract class LuminanceSource{
    *         larger than width * height bytes on some platforms. Do not modify the contents
    *         of the result.
    */
-  Uint8List getMatrix();
+  Uint8ClampedList getMatrix();
 
   /**
    * @return The width of the bitmap.
@@ -123,7 +120,7 @@ abstract class LuminanceSource{
 
   @override
   String toString() {
-    Uint8List row = new Uint8List(this._width);
+    Uint8ClampedList row = new Uint8ClampedList(this._width);
     String result;
     for (int y = 0; y < this._height; y++) {
       row = getRow(y, row);

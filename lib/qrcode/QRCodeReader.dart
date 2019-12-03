@@ -18,7 +18,6 @@
 import 'dart:typed_data';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 
 import '../BarcodeFormat.dart';
 import '../BinaryBitmap.dart';
@@ -46,7 +45,6 @@ class QRCodeReader implements Reader {
 
   final Decoder _decoder = new Decoder();
 
-  @protected
   Decoder getDecoder() {
     return this._decoder;
   }

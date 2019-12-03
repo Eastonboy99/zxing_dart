@@ -57,7 +57,7 @@ class GenericGF {
    *  In most cases it should be 1, but for QR code it is 0.
    */
   GenericGF(this._primitive, this._size, this._generatorBase) {
-
+    print("hi");
 
     this._expTable = new List<int>(this._size);
     this._logTable = new List<int>(this._size);
@@ -76,6 +76,7 @@ class GenericGF {
     // logTable[0] == 0 but this should never be used
     this._zero = new GenericGFPoly(this, new List.from({0}));
     this._one = new GenericGFPoly(this, new List.from({1}));
+    print(this._zero);
   }
 
   GenericGFPoly getZero() {
@@ -98,6 +99,7 @@ class GenericGF {
     }
     List<int> coefficients = new List(degree + 1);
     coefficients[0] = coefficient;
+    print("in Build monomial");
     return new GenericGFPoly(this, coefficients);
   }
 

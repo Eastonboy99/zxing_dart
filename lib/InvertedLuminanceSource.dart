@@ -31,7 +31,7 @@ class InvertedLuminanceSource extends LuminanceSource {
       : super(_delegate.getWidth(), _delegate.getHeight());
 
   @override
-  Uint8List getRow(int y, Uint8List row) {
+  Uint8ClampedList getRow(int y, Uint8ClampedList row) {
     row = this._delegate.getRow(y, row);
     int width = getWidth();
     for (int i = 0; i < width; i++) {
@@ -41,10 +41,10 @@ class InvertedLuminanceSource extends LuminanceSource {
   }
 
   @override
-  Uint8List getMatrix() {
-    Uint8List matrix = this._delegate.getMatrix();
+  Uint8ClampedList getMatrix() {
+    Uint8ClampedList matrix = this._delegate.getMatrix();
     int length = getWidth() * getHeight();
-    Uint8List invertedMatrix = new Uint8List(length);
+    Uint8ClampedList invertedMatrix = new Uint8ClampedList(length);
     for (int i = 0; i < length; i++) {
       invertedMatrix[i] = (255 - (matrix[i] & 0xFF));
     }

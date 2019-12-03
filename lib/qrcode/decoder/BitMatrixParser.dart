@@ -58,6 +58,7 @@ class BitMatrixParser {
       return _parsedFormatInfo;
     }
 
+
     // Read top-left format info bits
     int formatInfoBits1 = 0;
     for (int i = 0; i < 6; i++) {
@@ -72,6 +73,8 @@ class BitMatrixParser {
       formatInfoBits1 = _copyBit(8, j, formatInfoBits1);
     }
 
+
+
     // Read the top-right/bottom-left pattern too
     int dimension = _bitMatrix.getHeight();
     int formatInfoBits2 = 0;
@@ -84,6 +87,9 @@ class BitMatrixParser {
     }
 
     _parsedFormatInfo = FormatInformation.decodeFormatInformation(formatInfoBits1, formatInfoBits2);
+
+
+
     if (_parsedFormatInfo != null) {
       return _parsedFormatInfo;
     }
@@ -158,11 +164,14 @@ class BitMatrixParser {
 
     FormatInformation formatInfo = readFormatInformation();
     Version version = readVersion();
+    
 
     // Get the data mask for the format used in this QR Code. This will exclude
     // some bits from reading as we wind through the bit matrix.
     DataMask dataMask = DataMask.values()[formatInfo.getDataMask().first];
+
     int dimension = _bitMatrix.getHeight();
+
     dataMask.unmaskBitMatrix(_bitMatrix, dimension);
 
     BitMatrix functionPattern = version.buildFunctionPattern();

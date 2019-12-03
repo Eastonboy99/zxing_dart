@@ -134,11 +134,15 @@ class GenericGFPoly {
     int lengthDiff = largerCoefficients.length - smallerCoefficients.length;
     // Copy high-order terms only found in higher-degree polynomial's coefficients
     arraycopy(largerCoefficients, 0, sumDiff, 0, lengthDiff);
-
+    print("#51");
+    print(smallerCoefficients);
     for (int i = lengthDiff; i < largerCoefficients.length; i++) {
       sumDiff[i] = GenericGF.addOrSubtract(
           smallerCoefficients[i - lengthDiff], largerCoefficients[i]);
     }
+
+    print("#52");
+
 
     return new GenericGFPoly(this._field, sumDiff);
   }

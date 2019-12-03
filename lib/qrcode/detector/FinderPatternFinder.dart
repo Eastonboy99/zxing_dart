@@ -42,7 +42,7 @@ class FinderPatternFinder {
 
   BitMatrix _image;
   List<FinderPattern> _possibleCenters;
-  bool _hasSkipped;
+  bool _hasSkipped = false;
   List<int> _crossCheckStateCount;
   ResultPointCallback _resultPointCallback;
 

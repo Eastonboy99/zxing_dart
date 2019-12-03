@@ -56,7 +56,7 @@ class BitMatrix {
     this._height = height;
 
     this._rowSize = (rowSize) != null ? rowSize : (width + 31) ~/ 32;
-    this._bits = (bits) != null ? bits : new List(rowSize * height);
+    this._bits = (bits) != null ? bits : new List.filled(_rowSize * height, 0);
   }
 
   /**
@@ -197,7 +197,7 @@ class BitMatrix {
         this._rowSize != mask.getRowSize()) {
       throw new Exception("input matrix dimensions do not match");
     }
-    BitArray rowArray = new BitArray(size: this._width);
+    BitArray rowArray = new BitArray(this._width);
     for (int y = 0; y < this._height; y++) {
       int offset = y * this._rowSize;
       List<int> row = mask.getRow(y, rowArray).getBitArray().cast<int>();
@@ -255,7 +255,7 @@ class BitMatrix {
    */
   BitArray getRow(int y, BitArray row) {
     if (row == null || row.getSize() < this._width) {
-      row = new BitArray(size: this._width);
+      row = new BitArray(this._width);
     } else {
       row.clear();
     }
@@ -281,8 +281,8 @@ class BitMatrix {
   void rotate180() {
     int width = getWidth();
     int height = getHeight();
-    BitArray topRow = new BitArray(size: width);
-    BitArray bottomRow = new BitArray(size: width);
+    BitArray topRow = new BitArray(width);
+    BitArray bottomRow = new BitArray(width);
     for (int i = 0; i < (height + 1) / 2; i++) {
       topRow = getRow(i, topRow);
       bottomRow = getRow(height - 1 - i, bottomRow);
@@ -421,8 +421,7 @@ class BitMatrix {
    ListEquality().equals(this._bits, other._bits);
   }
 
-  @override
-  int hashCode() {
+  int get hashCode {
     int hash = this._width;
     hash = 31 * hash + this._width;
     hash = 31 * hash + this._height;

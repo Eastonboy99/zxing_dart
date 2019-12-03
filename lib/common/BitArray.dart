@@ -27,7 +27,7 @@ class BitArray {
   List<Int64> _bits;
   int _size;
 
-  BitArray({int size = 0}) {
+  BitArray([int size = 0]) {
     this._size = size;
     if (size != 0) {
       this._bits = _makeArray(size);

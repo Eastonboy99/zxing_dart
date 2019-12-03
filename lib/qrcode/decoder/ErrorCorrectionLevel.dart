@@ -16,28 +16,30 @@
 
 
 
+import '../../common/Enum.dart';
+
 /**
  * <p>See ISO 18004:2006, 6.5.1. This enum encapsulates the four error correction levels
  * defined by the QR code standard.</p>
  *
  * @author Sean Owen
  */
-class ErrorCorrectionLevel {
+class ErrorCorrectionLevel extends Enum<int>{
 
   /** L = ~7% correction */
-  static final L = (0x01);
+  static final L = new ErrorCorrectionLevel(0x01);
   /** M = ~15% correction */
-  static final M = (0x00);
+  static final M = new ErrorCorrectionLevel(0x00);
   /** Q = ~25% correction */
-  static final Q = (0x03);
+  static final Q = new ErrorCorrectionLevel(0x03);
   /** H = ~30% correction */
-  static final H = (0x02);
+  static final H = new ErrorCorrectionLevel(0x02);
 
   static final List<ErrorCorrectionLevel> _FOR_BITS = List.from({M, L, H, Q});
 
   final int _bits;
 
-  ErrorCorrectionLevel(this._bits);
+  const ErrorCorrectionLevel(this._bits) : super(_bits);
 
   int getBits() {
     return this._bits;

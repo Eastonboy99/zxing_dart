@@ -56,8 +56,11 @@ class ReedSolomonDecoder {
    * @throws ReedSolomonException if decoding fails for any reason
    */
   void decode(List<int> received, int twoS) {
+    print("#41");
     GenericGFPoly poly = new GenericGFPoly(this._field, received);
-    List<int> syndromeCoefficients = new List<int>(twoS);
+    print("#42");
+
+    List<int> syndromeCoefficients = new List<int>.filled(twoS, 0);
     bool noError = true;
     for (int i = 0; i < twoS; i++) {
       int eval = poly.evaluateAt(this._field.exp(i + this._field.getGeneratorBase()));
@@ -70,8 +73,12 @@ class ReedSolomonDecoder {
       return;
     }
     GenericGFPoly syndrome = new GenericGFPoly(this._field, syndromeCoefficients);
+    print("#43");
+
     List<GenericGFPoly> sigmaOmega =
         _runEuclideanAlgorithm(this._field.buildMonomial(twoS, 1), syndrome, twoS);
+    print("#44");
+
     GenericGFPoly sigma = sigmaOmega[0];
     GenericGFPoly omega = sigmaOmega[1];
     List<int> errorLocations = _findErrorLocations(sigma);
@@ -87,6 +94,8 @@ class ReedSolomonDecoder {
 
   List<GenericGFPoly> _runEuclideanAlgorithm(GenericGFPoly a, GenericGFPoly b, int R)
    {
+    print("#45");
+
     // Assume a's degree is >= b's
     if (a.getDegree() < b.getDegree()) {
       GenericGFPoly temp = a;
@@ -118,9 +127,13 @@ class ReedSolomonDecoder {
       while (r.getDegree() >= rLast.getDegree() && !r.isZero()) {
         int degreeDiff = r.getDegree() - rLast.getDegree();
         int scale = this._field.multiply(r.getCoefficient(r.getDegree()), dltInverse);
+    print("#46");
+
         q = q.addOrSubtract(this._field.buildMonomial(degreeDiff, scale));
         r = r.addOrSubtract(rLast.multiplyByMonomial(degreeDiff, scale));
       }
+    print("#47");
+
 
       t = q.multiply(other: tLast).addOrSubtract(tLastLast);
 

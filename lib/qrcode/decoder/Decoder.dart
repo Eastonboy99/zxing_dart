@@ -78,23 +78,29 @@ class Decoder {
     try {
       return decode(parser as BitMatrix, hints);
     } catch (e) {
-      fe = e; // need to fix this
-      ce = e; // need to fix this
+      // fe = e; // need to fix this
+      // ce = e; // need to fix this
     }
 
     try {
 
       // Revert the bit matrix
       parser.remask();
+      print("#1");
 
       // Will be attempting a mirrored reading of the version and format info.
       parser.setMirror(true);
+      print("#2");
+
 
       // Preemptively read the version.
       parser.readVersion();
+      print("#3");
+
 
       // Preemptively read the format information.
       parser.readFormatInformation();
+      print("#5");
 
       /*
        * Since we're here, this means we have successfully detected some kind
@@ -104,38 +110,53 @@ class Decoder {
        */
       // Prepare for a mirrored reading.
       parser.mirror();
+      print("#6");
+
 
       DecoderResult result = _decode(parser, hints);
+      print("#7");
+
 
       // Success! Notify the caller that the code was mirrored.
       result.setOther(new QRCodeDecoderMetaData(true));
+      print("#8");
+
 
       return result;
 
     } catch (e) {
-      // Throw the exception from the original reading
-      if (fe != null) {
-        throw fe;
-      }
-      throw ce; // If fe is null, this can't be
+      throw Exception(e); //TODO: Fix this
+      // // Throw the exception from the original reading
+      // if (fe != null) {
+      //   throw Exception("Something Happened");
+      // }
+      // throw Exception("Something happend"); // If fe is null, this can't be
     }
   }
 
   DecoderResult _decode(BitMatrixParser parser, Map<DecodeHintType, Object> hints)
       {
     Version version = parser.readVersion();
-    ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();
+    print("#31");
 
+    ErrorCorrectionLevel ecLevel = parser.readFormatInformation().getErrorCorrectionLevel();
+    print("#32");
     // Read codewords
     Uint8List codewords = parser.readCodewords();
+    print("#33");
+
     // Separate into data blocks
     List<DataBlock> dataBlocks = DataBlock.getDataBlocks(codewords, version, ecLevel);
+    print("#34");
+
 
     // Count total number of data bytes
     int totalBytes = 0;
     for (DataBlock dataBlock in dataBlocks) {
       totalBytes += dataBlock.getNumDataCodewords();
     }
+    print("#35");
+
     Uint8List resultBytes = new Uint8List(totalBytes);
     int resultOffset = 0;
 
@@ -143,7 +164,11 @@ class Decoder {
     for (DataBlock dataBlock in dataBlocks) {
       Uint8List codewordBytes = dataBlock.getCodewords();
       int numDataCodewords = dataBlock.getNumDataCodewords();
+    print("#36");
+
       _correctErrors(codewordBytes, numDataCodewords);
+    print("#37");
+
       for (int i = 0; i < numDataCodewords; i++) {
         resultBytes[resultOffset++] = codewordBytes[i];
       }
@@ -164,14 +189,15 @@ class Decoder {
   void _correctErrors(Uint8List codewordBytes, int numDataCodewords) {
     int numCodewords = codewordBytes.length;
     // First read into an array of ints
-    List<int> codewordsInts = new List<int>(numCodewords);
+    List<int> codewordsInts = new List<int>.filled(numCodewords, 0);
     for (int i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }
     try {
       _rsDecoder.decode(codewordsInts, codewordBytes.length - numDataCodewords);
     } catch (ignored) {
-      throw Exception("Checksum Exception");
+      throw Exception(ignored);
+      // throw Exception("Checksum Exception");
     }
     // Copy back into array of bytes -- only need to worry about the bytes that were data
     // We don't care about errors in the error-correction codewords
