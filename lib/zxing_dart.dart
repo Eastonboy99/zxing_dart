@@ -1,66 +1,66 @@
 library zxing_dart;
 
 
-export 'BarcodeFormat.dart';
-export 'Binarizer.dart';
-export 'BinaryBitmap.dart';
-export 'DecodeHintType.dart';
-export 'InvertedLuminanceSource.dart';
-export 'LuminanceSource.dart';
-export 'Reader.dart';
-export 'Result.dart';
-export 'ResultMetadataType.dart';
-export 'ResultPoint.dart';
-export 'ResultPOintCallback.dart';
+export 'src/BarcodeFormat.dart';
+export 'src/Binarizer.dart';
+export 'src/BinaryBitmap.dart';
+export 'src/DecodeHintType.dart';
+export 'src/InvertedLuminanceSource.dart';
+export 'src/LuminanceSource.dart';
+export 'src/Reader.dart';
+export 'src/Result.dart';
+export 'src/ResultMetadataType.dart';
+export 'src/ResultPoint.dart';
+export 'src/ResultPOintCallback.dart';
 
 // clients
-export 'clients/cli/ImageFileLuminanceSource.dart';
+export 'src/clients/cli/ImageFileLuminanceSource.dart';
 
 // common
-export 'common/BitArray.dart';
-export 'common/BitMatrix.dart';
-export 'common/BitSource.dart';
-export 'common/CharacterSetECI.dart';
-export 'common/DecoderResult.dart';
-export 'common/DefaultGridSampler.dart';
-export 'common/DetectorResult.dart';
-export 'common/Enum.dart';
-export 'common/GlobalHistogramBinarizer.dart';
-export 'common/GridSampler.dart';
-export 'common/HybridBinarizer.dart';
-export 'common/PerspectiveTransform.dart';
-export 'common/StringUtils.dart';
+export 'src/common/BitArray.dart';
+export 'src/common/BitMatrix.dart';
+export 'src/common/BitSource.dart';
+export 'src/common/CharacterSetECI.dart';
+export 'src/common/DecoderResult.dart';
+export 'src/common/DefaultGridSampler.dart';
+export 'src/common/DetectorResult.dart';
+export 'src/common/Enum.dart';
+export 'src/common/GlobalHistogramBinarizer.dart';
+export 'src/common/GridSampler.dart';
+export 'src/common/HybridBinarizer.dart';
+export 'src/common/PerspectiveTransform.dart';
+export 'src/common/StringUtils.dart';
 
 // common/detector
-export 'common/detector/MathUtils.dart';
+export 'src/common/detector/MathUtils.dart';
 
 //common/reedsolomon
-export 'common/reedsolomon/GenericGF.dart';
-export 'common/reedsolomon/GenericGFPoly.dart';
-export 'common/reedsolomon/ReedSolomonDecoder.dart';
+export 'src/common/reedsolomon/GenericGF.dart';
+export 'src/common/reedsolomon/GenericGFPoly.dart';
+export 'src/common/reedsolomon/ReedSolomonDecoder.dart';
 
 
 // qrcode
-export 'qrcode/QRCodeReader.dart';
+export 'src/qrcode/QRCodeReader.dart';
 
 // qrcode/decoder
-export 'qrcode/decoder/BitMatrixParser.dart';
-export 'qrcode/decoder/DataBlock.dart';
-export 'qrcode/decoder/DataMask.dart';
-export 'qrcode/decoder/DecodedBitStreamParser.dart';
-export 'qrcode/decoder/Decoder.dart';
-export 'qrcode/decoder/ErrorCorrectionLevel.dart';
-export 'qrcode/decoder/FormatInformation.dart';
-export 'qrcode/decoder/Mode.dart';
-export 'qrcode/decoder/QRCodeDecoderMetaData.dart';
-export 'qrcode/decoder/Version.dart';
+export 'src/qrcode/decoder/BitMatrixParser.dart';
+export 'src/qrcode/decoder/DataBlock.dart';
+export 'src/qrcode/decoder/DataMask.dart';
+export 'src/qrcode/decoder/DecodedBitStreamParser.dart';
+export 'src/qrcode/decoder/Decoder.dart';
+export 'src/qrcode/decoder/ErrorCorrectionLevel.dart';
+export 'src/qrcode/decoder/FormatInformation.dart';
+export 'src/qrcode/decoder/Mode.dart';
+export 'src/qrcode/decoder/QRCodeDecoderMetaData.dart';
+export 'src/qrcode/decoder/Version.dart';
 
 // qrcode/detector
 
-export 'qrcode/detector/AlignmentPattern.dart';
-export 'qrcode/detector/AlignmentPatternFinder.dart';
-export 'qrcode/detector/Detector.dart';
-export 'qrcode/detector/FinderPattern.dart';
-export 'qrcode/detector/FinderPatternFinder.dart';
-export 'qrcode/detector/FinderPatternInfo.dart';
+export 'src/qrcode/detector/AlignmentPattern.dart';
+export 'src/qrcode/detector/AlignmentPatternFinder.dart';
+export 'src/qrcode/detector/Detector.dart';
+export 'src/qrcode/detector/FinderPattern.dart';
+export 'src/qrcode/detector/FinderPatternFinder.dart';
+export 'src/qrcode/detector/FinderPatternInfo.dart';
 

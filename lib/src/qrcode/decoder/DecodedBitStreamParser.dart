@@ -16,7 +16,7 @@
 
 import 'dart:typed_data';
 
-import 'package:zxing_dart/utils.dart';
+import '../../utils.dart';
 
 import '../../DecodeHintType.dart';
 import '../../common/BitSource.dart';

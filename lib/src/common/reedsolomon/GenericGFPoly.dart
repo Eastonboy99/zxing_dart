@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import 'package:zxing_dart/utils.dart';
+import '../../utils.dart';
 
 import './GenericGF.dart';
 
@@ -40,25 +40,28 @@ class GenericGFPoly {
    * or if leading coefficient is 0 and this is not a
    * constant polynomial (that is, it is not the monomial "0")
    */
-  GenericGFPoly(this._field, this._coefficients) {
-    if (this._coefficients.length == 0) {
-      throw new Exception();
+  GenericGFPoly(this._field, List<int> coefficients) {
+    if (coefficients.isEmpty) {
+      throw Exception();
     }
-    int coefficientsLength = this._coefficients.length;
-    if (coefficientsLength > 1 && this._coefficients[0] == 0) {
+    int coefficientsLength = coefficients.length;
+    if (coefficientsLength > 1 && coefficients[0] == 0) {
       // Leading term must be non-zero for anything except the constant polynomial "0"
       int firstNonZero = 1;
       while (firstNonZero < coefficientsLength &&
-          this._coefficients[firstNonZero] == 0) {
+          coefficients[firstNonZero] == 0) {
         firstNonZero++;
       }
       if (firstNonZero == coefficientsLength) {
-        this._coefficients = new List.from({0});
+        this._coefficients = List.from({0});
       } else {
-        this._coefficients = new List<int>(coefficientsLength - firstNonZero);
-        arraycopy(this._coefficients, firstNonZero, this._coefficients, 0,
+        this._coefficients = List<int>(coefficientsLength - firstNonZero);
+        this._coefficients = arraycopy(coefficients, firstNonZero, this._coefficients, 0,
             this._coefficients.length);
+            print(this._coefficients);
       }
+    }else{
+      this._coefficients = coefficients;
     }
   }
 
@@ -114,7 +117,7 @@ class GenericGFPoly {
 
   GenericGFPoly addOrSubtract(GenericGFPoly other) {
     if (!(this._field == other._field)) {
-      throw new Exception("GenericGFPolys do not have same GenericGF field");
+      throw Exception("GenericGFPolys do not have same GenericGF field");
     }
     if (isZero()) {
       return other;
@@ -130,7 +133,7 @@ class GenericGFPoly {
       smallerCoefficients = largerCoefficients;
       largerCoefficients = temp;
     }
-    List<int> sumDiff = new List<int>(largerCoefficients.length);
+    List<int> sumDiff = List<int>(largerCoefficients.length);
     int lengthDiff = largerCoefficients.length - smallerCoefficients.length;
     // Copy high-order terms only found in higher-degree polynomial's coefficients
     arraycopy(largerCoefficients, 0, sumDiff, 0, lengthDiff);
@@ -144,13 +147,13 @@ class GenericGFPoly {
     print("#52");
 
 
-    return new GenericGFPoly(this._field, sumDiff);
+    return GenericGFPoly(this._field, sumDiff);
   }
 
   GenericGFPoly multiply({GenericGFPoly other, int scalar}) {
     if (other != null) {
       if (!(this._field == other._field)) {
-        throw new Exception("GenericGFPolys do not have same GenericGF field");
+        throw Exception("GenericGFPolys do not have same GenericGF field");
       }
       if (isZero() || other.isZero()) {
         return this._field.getZero();
@@ -159,7 +162,7 @@ class GenericGFPoly {
       int aLength = aCoefficients.length;
       List<int> bCoefficients = other._coefficients;
       int bLength = bCoefficients.length;
-      List<int> product = new List<int>(aLength + bLength - 1);
+      List<int> product = List<int>.filled(aLength + bLength - 1, 0);
       for (int i = 0; i < aLength; i++) {
         int aCoeff = aCoefficients[i];
         for (int j = 0; j < bLength; j++) {
@@ -167,7 +170,7 @@ class GenericGFPoly {
               product[i + j], this._field.multiply(aCoeff, bCoefficients[j]));
         }
       }
-      return new GenericGFPoly(this._field, product);
+      return GenericGFPoly(this._field, product);
     } else {
       if (scalar == 0) {
         return this._field.getZero();
@@ -176,35 +179,35 @@ class GenericGFPoly {
         return this;
       }
       int size = this._coefficients.length;
-      List<int> product = new List<int>(size);
+      List<int> product = List<int>(size);
       for (int i = 0; i < size; i++) {
         product[i] = this._field.multiply(this._coefficients[i], scalar);
       }
-      return new GenericGFPoly(this._field, product);
+      return GenericGFPoly(this._field, product);
     }
   }
 
   GenericGFPoly multiplyByMonomial(int degree, int coefficient) {
     if (degree < 0) {
-      throw new Exception();
+      throw Exception();
     }
     if (coefficient == 0) {
       return this._field.getZero();
     }
     int size = this._coefficients.length;
-    List<int> product = new List<int>(size + degree);
+    List<int> product = List<int>.filled(size + degree, 0);
     for (int i = 0; i < size; i++) {
       product[i] = this._field.multiply(this._coefficients[i], coefficient);
     }
-    return new GenericGFPoly(this._field, product);
+    return GenericGFPoly(this._field, product);
   }
 
   List<GenericGFPoly> divide(GenericGFPoly other) {
     if (!(this._field == other._field)) {
-      throw new Exception("GenericGFPolys do not have same GenericGF field");
+      throw Exception("GenericGFPolys do not have same GenericGF field");
     }
     if (other.isZero()) {
-      throw new Exception("Divide by 0");
+      throw Exception("Divide by 0");
     }
 
     GenericGFPoly quotient = this._field.getZero();
@@ -226,7 +229,7 @@ class GenericGFPoly {
       remainder = remainder.addOrSubtract(term);
     }
 
-    return new List.from({quotient, remainder});
+    return List.from({quotient, remainder});
   }
 
   @override
@@ -246,7 +249,7 @@ class GenericGFPoly {
           }
           coefficient = -coefficient;
         } else {
-          if (result.length > 0) {
+          if (result.isNotEmpty) {
             result += " + ";
           }
         }

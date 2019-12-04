@@ -28,12 +28,12 @@ import './GenericGFPoly.dart';
  */
 class GenericGF {
 
-  static final GenericGF AZTEC_DATA_12 = new GenericGF(0x1069, 4096, 1); // x^12 + x^6 + x^5 + x^3 + 1
-  static final GenericGF AZTEC_DATA_10 = new GenericGF(0x409, 1024, 1); // x^10 + x^3 + 1
-  static final GenericGF AZTEC_DATA_6 = new GenericGF(0x43, 64, 1); // x^6 + x + 1
-  static final GenericGF AZTEC_PARAM = new GenericGF(0x13, 16, 1); // x^4 + x + 1
-  static final GenericGF QR_CODE_FIELD_256 = new GenericGF(0x011D, 256, 0); // x^8 + x^4 + x^3 + x^2 + 1
-  static final GenericGF DATA_MATRIX_FIELD_256 = new GenericGF(0x012D, 256, 1); // x^8 + x^5 + x^3 + x^2 + 1
+  static final GenericGF AZTEC_DATA_12 = GenericGF(0x1069, 4096, 1); // x^12 + x^6 + x^5 + x^3 + 1
+  static final GenericGF AZTEC_DATA_10 = GenericGF(0x409, 1024, 1); // x^10 + x^3 + 1
+  static final GenericGF AZTEC_DATA_6 = GenericGF(0x43, 64, 1); // x^6 + x + 1
+  static final GenericGF AZTEC_PARAM = GenericGF(0x13, 16, 1); // x^4 + x + 1
+  static final GenericGF QR_CODE_FIELD_256 = GenericGF(0x011D, 256, 0); // x^8 + x^4 + x^3 + x^2 + 1
+  static final GenericGF DATA_MATRIX_FIELD_256 = GenericGF(0x012D, 256, 1); // x^8 + x^5 + x^3 + x^2 + 1
   static final GenericGF AZTEC_DATA_8 = DATA_MATRIX_FIELD_256;
   static final GenericGF MAXICODE_FIELD_64 = AZTEC_DATA_6;
 
@@ -59,8 +59,8 @@ class GenericGF {
   GenericGF(this._primitive, this._size, this._generatorBase) {
     print("hi");
 
-    this._expTable = new List<int>(this._size);
-    this._logTable = new List<int>(this._size);
+    this._expTable = List<int>(this._size);
+    this._logTable = List<int>(this._size);
     int x = 1;
     for (int i = 0; i < this._size; i++) {
       this._expTable[i] = x;
@@ -74,9 +74,8 @@ class GenericGF {
       this._logTable[this._expTable[i]] = i;
     }
     // logTable[0] == 0 but this should never be used
-    this._zero = new GenericGFPoly(this, new List.from({0}));
-    this._one = new GenericGFPoly(this, new List.from({1}));
-    print(this._zero);
+    this._zero = GenericGFPoly(this, List.from({0}));
+    this._one = GenericGFPoly(this, List.from({1}));
   }
 
   GenericGFPoly getZero() {
@@ -92,15 +91,15 @@ class GenericGF {
    */
   GenericGFPoly buildMonomial(int degree, int coefficient) {
     if (degree < 0) {
-      throw new Exception("Illegal Argument");
+      throw Exception("Illegal Argument");
     }
     if (coefficient == 0) {
       return this._zero;
     }
-    List<int> coefficients = new List(degree + 1);
+    List<int> coefficients = List.filled(degree + 1, 0);
     coefficients[0] = coefficient;
     print("in Build monomial");
-    return new GenericGFPoly(this, coefficients);
+    return GenericGFPoly(this, coefficients);
   }
 
   /**
@@ -124,7 +123,7 @@ class GenericGF {
    */
   int log(int a) {
     if (a == 0) {
-      throw new Exception("Illegal Argument");
+      throw Exception("Illegal Argument");
     }
     return this._logTable[a];
   }
@@ -134,7 +133,7 @@ class GenericGF {
    */
   int inverse(int a) {
     if (a == 0) {
-      throw new Exception("Arithmetic");
+      throw Exception("Arithmetic");
     }
     return this._expTable[this._size - this._logTable[a] - 1];
   }

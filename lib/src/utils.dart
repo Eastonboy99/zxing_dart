@@ -1,8 +1,9 @@
 
 import 'dart:core';
 
-void arraycopy(List src, int srcPos, List dest, int destPos, int length) {
+List arraycopy(List src, int srcPos, List dest, int destPos, int length) {
   dest.setRange(destPos, length + destPos, src, srcPos);
+  return dest;
 }
 
 int bitCount(int bits){

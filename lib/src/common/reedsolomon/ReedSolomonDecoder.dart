@@ -56,14 +56,15 @@ class ReedSolomonDecoder {
    * @throws ReedSolomonException if decoding fails for any reason
    */
   void decode(List<int> received, int twoS) {
+    var field = this._field;
     print("#41");
-    GenericGFPoly poly = new GenericGFPoly(this._field, received);
+    GenericGFPoly poly = GenericGFPoly(field, received);
     print("#42");
 
-    List<int> syndromeCoefficients = new List<int>.filled(twoS, 0);
+    List<int> syndromeCoefficients = List<int>.filled(twoS, 0);
     bool noError = true;
     for (int i = 0; i < twoS; i++) {
-      int eval = poly.evaluateAt(this._field.exp(i + this._field.getGeneratorBase()));
+      int eval = poly.evaluateAt(this._field.exp(i + field.getGeneratorBase()));
       syndromeCoefficients[syndromeCoefficients.length - 1 - i] = eval;
       if (eval != 0) {
         noError = false;
@@ -72,11 +73,11 @@ class ReedSolomonDecoder {
     if (noError) {
       return;
     }
-    GenericGFPoly syndrome = new GenericGFPoly(this._field, syndromeCoefficients);
+    GenericGFPoly syndrome = GenericGFPoly(field, syndromeCoefficients);
     print("#43");
 
     List<GenericGFPoly> sigmaOmega =
-        _runEuclideanAlgorithm(this._field.buildMonomial(twoS, 1), syndrome, twoS);
+        _runEuclideanAlgorithm(field.buildMonomial(twoS, 1), syndrome, twoS);
     print("#44");
 
     GenericGFPoly sigma = sigmaOmega[0];
@@ -102,14 +103,15 @@ class ReedSolomonDecoder {
       a = b;
       b = temp;
     }
+    var field = this._field;
 
     GenericGFPoly rLast = a;
     GenericGFPoly r = b;
-    GenericGFPoly tLast = this._field.getZero();
-    GenericGFPoly t = this._field.getOne();
+    GenericGFPoly tLast = field.getZero();
+    GenericGFPoly t = field.getOne();
 
     // Run Euclidean algorithm until r's degree is less than R/2
-    while (r.getDegree() >= R / 2) {
+    while (r.getDegree() >= (R ~/ 2 | 0)) {
       GenericGFPoly rLastLast = rLast;
       GenericGFPoly tLastLast = tLast;
       rLast = r;
@@ -118,57 +120,57 @@ class ReedSolomonDecoder {
       // Divide rLastLast by rLast, with quotient in q and remainder in r
       if (rLast.isZero()) {
         // Oops, Euclidean algorithm already terminated?
-        throw new Exception("r_{i-1} was zero");
+        throw Exception("r_{i-1} was zero");
       }
       r = rLastLast;
-      GenericGFPoly q = this._field.getZero();
+      GenericGFPoly q = field.getZero();
       int denominatorLeadingTerm = rLast.getCoefficient(rLast.getDegree());
-      int dltInverse = this._field.inverse(denominatorLeadingTerm);
+      int dltInverse = field.inverse(denominatorLeadingTerm);
       while (r.getDegree() >= rLast.getDegree() && !r.isZero()) {
         int degreeDiff = r.getDegree() - rLast.getDegree();
-        int scale = this._field.multiply(r.getCoefficient(r.getDegree()), dltInverse);
-    print("#46");
-
-        q = q.addOrSubtract(this._field.buildMonomial(degreeDiff, scale));
+        int scale = field.multiply(r.getCoefficient(r.getDegree()), dltInverse);
+        print("#46");
+        q = q.addOrSubtract(field.buildMonomial(degreeDiff, scale));
         r = r.addOrSubtract(rLast.multiplyByMonomial(degreeDiff, scale));
       }
     print("#47");
 
-
       t = q.multiply(other: tLast).addOrSubtract(tLastLast);
+      print("#48");
 
       if (r.getDegree() >= rLast.getDegree()) {
-        throw new Exception("Division algorithm failed to reduce polynomial?");
+        throw Exception("Division algorithm failed to reduce polynomial?");
       }
     }
 
     int sigmaTildeAtZero = t.getCoefficient(0);
     if (sigmaTildeAtZero == 0) {
-      throw new Exception("sigmaTilde(0) was zero");
+      throw Exception("sigmaTilde(0) was zero");
     }
 
-    int inverse = this._field.inverse(sigmaTildeAtZero);
+    int inverse = field.inverse(sigmaTildeAtZero);
     GenericGFPoly sigma = t.multiply(scalar: inverse);
     GenericGFPoly omega = r.multiply(scalar: inverse);
-    return new List.from({sigma, omega});
+    return List.from({sigma, omega});
   }
 
   List<int> _findErrorLocations(GenericGFPoly errorLocator) {
     // This is a direct application of Chien's search
     int numErrors = errorLocator.getDegree();
     if (numErrors == 1) { // shortcut
-      return new List.from({ errorLocator.getCoefficient(1) });
+      return List.from({ errorLocator.getCoefficient(1) });
     }
-    List<int> result = new List<int>(numErrors);
+    List<int> result = List<int>.filled(numErrors, 0);
     int e = 0;
     for (int i = 1; i < this._field.getSize() && e < numErrors; i++) {
-      if (errorLocator.evaluateAt(i) == 0) {
+      var test  = errorLocator.evaluateAt(i);
+      if (test == 0) {
         result[e] = this._field.inverse(i);
         e++;
       }
     }
     if (e != numErrors) {
-      throw new Exception("Error locator degree does not match number of roots");
+      throw Exception("Error locator degree does not match number of roots");
     }
     return result;
   }
@@ -176,7 +178,7 @@ class ReedSolomonDecoder {
   List<int> _findErrorMagnitudes(GenericGFPoly errorEvaluator, List<int> errorLocations) {
     // This is directly applying Forney's Formula
     int s = errorLocations.length;
-    List<int> result = new List<int>(s);
+    List<int> result = List<int>(s);
     for (int i = 0; i < s; i++) {
       int xiInverse = this._field.inverse(errorLocations[i]);
       int denominator = 1;

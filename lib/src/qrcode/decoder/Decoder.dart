@@ -189,7 +189,7 @@ class Decoder {
   void _correctErrors(Uint8List codewordBytes, int numDataCodewords) {
     int numCodewords = codewordBytes.length;
     // First read into an array of ints
-    List<int> codewordsInts = new List<int>.filled(numCodewords, 0);
+    List<int> codewordsInts = List<int>.filled(numCodewords, 0);
     for (int i = 0; i < numCodewords; i++) {
       codewordsInts[i] = codewordBytes[i] & 0xFF;
     }

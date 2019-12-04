@@ -23,7 +23,7 @@ import 'package:collection/collection.dart';
 import 'package:fixnum/fixnum.dart';
 
 import 'BitArray.dart';
-import 'package:zxing_dart/utils.dart';
+import '../utils.dart';
 
 /**
  * <p>Represents a 2D matrix of bits. In function arguments below, and throughout the common

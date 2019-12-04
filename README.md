@@ -2,13 +2,24 @@
 
 A dart port of [ZXing](https://github.com/zxing/zxing) (Zebra Crossing)
 
-## Getting Started
+Created from templates made available by Stagehand under a BSD-style
+[license](https://github.com/dart-lang/stagehand/blob/master/LICENSE).
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+## Usage
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+A simple usage example:
+
+```dart
+import 'package:zxing_dart/zxing_dart.dart';
+
+main() {
+  var awesome = new Awesome();
+}
+```
+
+## Features and bugs
+
+Please file feature requests and bugs at the [issue tracker][tracker].
+
+[tracker]: http://example.com/issues/replaceme
+
